@@ -1,10 +1,7 @@
-```
 # Redis
 
-Earlier databases like were used to retrieve information like POSTGRESQL 
-but they stored data in HardDisk/SSD 
+Earlier databases like PostgreSQL were used to retrieve information  
+but they stored data in HardDisk/SSD  
 
-**But now with the introduction of redis one can store and retrive it from server RAM itself
+**But now with the introduction of Redis one can store and retrieve it from server RAM itself  
 which seems to be very fast**
-
-```
