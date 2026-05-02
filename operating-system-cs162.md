@@ -40,4 +40,9 @@ The OS abstracts these abstracts the hardware details from the application
  
  # Process
  ![alt text](image-4.png)
- 
+ ![alt text](image-5.png)
+
+ # The illusion of multiple processors
+
+ - Here what we do is we try to switch alternate between the two processes so fast we thought we are having two processors. the registers are pointing towards green or brown memory where it is left off
+ ![alt text](image-6.png)
