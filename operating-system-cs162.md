@@ -70,4 +70,67 @@ Now under this
 
 ## Address Space
    ![alt text](image-17.png)
+   whats in heap segment ->things allocated with malloc
+   ![alt text](image-18.png)
+
+## Protection
+   How OS can protect
+   ![alt text](image-19.png)
+   ![alt text](image-20.png)
+   - With base and bound it is like hardware type check means the address space should be greater than base and it should be less than bound
+
+   Adress space translation
+   ![alt text](image-21.png)
+   ![alt text](image-22.png)
+    - Page tables is used to convert virtual address into physical ones
+
+## PRocess
+ ![alt text](image-23.png)
+ Tradeoff-
+ ![alt text](image-24.png)
+
+## Multithreading or single-threading
+ ![alt text](image-25.png)
+ ![alt text](image-26.png)
+
+![alt text](image-27.png)
+process is a container and thread is an execution element
+
+## Why do we need processes
+ ![alt text](image-28.png)
+
+## Fourth OS concept
+  ![alt text](image-29.png)
+  ![alt text](image-31.png)
+  ![alt text](image-32.png)
+  in system mode base and bound is ignored because we have full spaces
+
+  These are the ways we can go from user mode to kernel mode
+  ![alt text](image-33.png)
+  - This interrupt table is already loaded in os boots and run the execution that whether to switch from process a to process b
+  ![alt text](image-34.png)
+![alt text](image-35.png)
+![alt text](image-36.png)
+
+## MEMORY management
+![alt text](image-37.png)
+![alt text](image-38.png)
+
+## Adding Thread
+![alt text](image-39.png)
+![alt text](image-40.png)
+Here one can interlave between threads mean one can go and leave and do other job
+
+## Facts
+![alt text](image-41.png)
+
+## Switching
+Here in 2nd case there is blockage due to I/O operation that is the reason it cant interleave between threads
+![alt text](image-42.png)
+![alt text](image-43.png)
+- In multithreaded processes, one can share data between same adresses ... means same processes
+
+![alt text](image-44.png)
+
+
    
