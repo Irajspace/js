@@ -46,3 +46,28 @@ The OS abstracts these abstracts the hardware details from the application
 
  - Here what we do is we try to switch alternate between the two processes so fast we thought we are having two processors. the registers are pointing towards green or brown memory where it is left off
  ![alt text](image-6.png)
+ ![alt text](image-7.png)
+
+ # Abstraction
+ ![alt text](image-8.png)
+ ![alt text](image-9.png)
+ ![alt text](image-10.png)
+
+# Instruction cycle
+- So what happens is program counter present at processor points to memory allow the processor to have set of instructions . It pulls the instructions in from the memory and decode it and then we execute it
+
+Now under this 
+
+## Thread
+  It got its own program counter, registers,execution flags, memory stack
+  ![alt text](image-11.png)
+  ![alt text](image-12.png)
+  ![alt text](image-13.png)
+  A CPU has registers, including the Program Counter (PC), which points to the next instruction in memory. The CPU fetches that instruction, decodes it, and executes it. The thread’s execution state (context) is partly stored in registers and partly in memory.(TCB-> thread control block)
+  ![alt text](image-14.png)
+  ![alt text](image-15.png)
+  ![alt text](image-16.png)
+
+## Address Space
+   ![alt text](image-17.png)
+   
