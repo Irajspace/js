@@ -128,9 +128,61 @@ Here one can interlave between threads mean one can go and leave and do other jo
 Here in 2nd case there is blockage due to I/O operation that is the reason it cant interleave between threads
 ![alt text](image-42.png)
 ![alt text](image-43.png)
-- In multithreaded processes, one can share data between same adresses ... means same processes
+- In multithreaded processes, one can share data betweensame adresses ... means same processes
 
 ![alt text](image-44.png)
+
+Clearance
+![alt text](image-45.png)
+![alt text](image-46.png)
+
+posix threads
+![alt text](image-47.png)
+
+# The way we can read this is go from inside to out star routine is a pointer to a function that takes a void * and return a void *
+ - Thread join means until thread is not completed it will not go 
+![alt text](image-49.png)
+special trap instruction lets you jump from user mode to kernel mode and find out it is not error it is used to create thread and this is wrapper around system call
+![alt text](image-50.png)
+You see this means until and unless all thread is not completed till finally then only parent thread will continue
+
+![alt text](image-51.png)
+
+- The first argument is no of arguments passed 
+Lets take an example ./program.out 5 
+here no of arguments passed is 2 
+arg[0]="./program.out
+arg[1]="5"
+
+So basically what is happening is we are taking no of threads we want to create if we dont pass we are taking default as 2 
+Then what are we doing is we are creating threads and joining as a parent thread
+
+![alt text](image-52.png)
+It is going to look like this
+Here you can see the thread is not having same exact order
+means it is not sequential because it got interleaved
+![alt text](image-53.png)
+Here pink stack grows long it can cause error in bluse stack
+![alt text](image-54.png)
+
+# INTERLEAVING AND INDETERMINSM
+illusion is all threads run in a processes run but actually some of the run and some dont
+![alt text](image-56.png)
+![alt text](image-55.png)
+![alt text](image-57.png)
+![alt text](image-58.png)
+Here you can see racing conditions happens
+Although in Js 
+we are it is single threaded it causes racing condition because of async code
+
+![alt text](image-60.png)
+![alt text](image-59.png)
+
+## Threads cant share stack 
+- beacuse is stack we have state stored
+![alt text](image-61.png)
+
+
 
 
    
