@@ -181,6 +181,38 @@ we are it is single threaded it causes racing condition because of async code
 ## Threads cant share stack 
 - beacuse is stack we have state stored
 ![alt text](image-61.png)
+SOlution
+![alt text](image-62.png)
+
+# LOCKS
+![alt text](image-63.png)
+![alt text](image-64.png)
+
+# How are we gonna lock it
+![alt text](image-65.png)
+![alt text](image-66.png)
+
+# How are the processes start
+![alt text](image-67.png)
+
+![alt text](image-68.png)it
+![alt text](image-69.png)
+fork creates a process
+it copies a process into another adr  ess space 
+![alt text](image-70.png)
+![alt text](image-71.png)
+![alt text](image-72.png)
+![alt text](image-73.png)
+![alt text](image-74.png)
+
+# Fork race
+![alt text](image-75.png)
+this is how new program is created Here what happended throw all my adress spaces and creates a new program means execute new instrucitons
+![alt text](image-77.png)
+![alt text](image-76.png)
+![alt text](image-78.png)
+
+
 
 
 
