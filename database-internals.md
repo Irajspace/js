@@ -1,14 +1,30 @@
-# CHAPTER-1
+# Chapter 1
 
-## Diff between OLTP and OLAP
--OLTP- ONline transaction processing
--OLTP - Handles day to day operations of an application
-      -  Means you can think of doing operations at the hand of touching one or two rows at a time
-      - High concurrency, short-lived, transactional
+## Difference Between OLTP and OLAP
 
-- OLAP - Online analytical processing
-       - handles business logic
-       - massive read-heavy queries that scan millions of rows to aggregate
+### OLTP (Online Transaction Processing)
 
-       
-        
+- Handles day-to-day operations of an application
+- Works on small numbers of rows at a time
+- High concurrency
+- Short-lived transactions
+- Transactional workloads
+
+Examples:
+- Banking transactions
+- Order placement
+- User login systems
+
+---
+
+### OLAP (Online Analytical Processing)
+
+- Handles analytical/business intelligence queries
+- Read-heavy workloads
+- Scans millions of rows
+- Performs aggregations and reporting
+
+Examples:
+- Sales analytics
+- Business dashboards
+- Revenue reports
