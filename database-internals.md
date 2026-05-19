@@ -195,3 +195,40 @@ Deletion Markers (Tombstones): The database simply writes a tiny "marker" or fla
 Shadowed Records: When you update a record, the database might just write a brand-new version of it somewhere else. The old version becomes "shadowed" (outdated/obscured by the new version).
 
 Garbage Collection (Compaction): Periodically, a background thread wakes up to clean the house. It reads an entire page into RAM, sifts out the live records, writes only the live records sequentially into a brand-new clean page on disk, and completely drops the old page containing the deleted or shadowed data.
+
+## Clustered vs Non-clustered
+![alt text](image-28.png)
+- since it has base data itself thats why we can create only one clustered index
+-![alt text](image-29.png)
+- here it has references to the base data 
+for non-clustered index
+![alt text](image-30.png)
+-You can create 10 different non-clustered indexes on 10 different columns (e.g., Email, Phone Number, Last Name, Department). None of them duplicate the heavy base table. They all just store tiny pointers that reference back to that exact same single base table. This is why you can have many of them without destroying your storage capacity.
+
+The Quick Analogy to Remember It:
+
+The Clustered Index is the actual printed pages of a dictionary (sorted alphabetically). You can't sort the printed pages a second way without printing a whole new physical dictionary.
+
+The Non-Clustered Indexes are the extra indexes at the back of the book (e.g., an index of words by origin, or an index of words by syllable count). You can have as many of these as you want, because they just point back to the same printed page numbers!
+
+![alt text](image-31.png)
+
+# How secondary index looks up data
+- Here both has its own pros and cons
+- though in first diagram it has less disk seek but updation cost is expensinve
+- in 2nd u have to update only primary key but con you have to go through primary index
+- mysql inno db decides 2nd is much better than 1st
+![alt text](image-32.png)
+
+## pillars of storage engine
+
+- buffered makes the execution very fast but it can lose data
+![alt text](image-33.png)
+![alt text](image-34.png)
+![alt text](image-35.png)
+![alt text](image-36.png)
+- what does mean by offset?
+-![alt text](image-37.png)
+
+
+# Chapter-2
