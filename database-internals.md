@@ -104,3 +104,94 @@ WHERE
 
 ```
 
+## The client-server model
+
+-The Server (Node): This is the Database Management System itself running on a machine. It listens for requests.
+
+-The Client: This is usually your application code (your Python, Java, or Node.js backend server).
+
+-It's important to remember that when we talk about a database "client," we don't mean the user's web browser or mobile app. The web browser talks to your backend API, and your backend API acts as the client that talks to the database server.
+
+- 1st) It first sends the raw text from node js or any backend
+- 2nd) It takes the string and convert to AST(abstract syntax tree)-Query parser
+- 3rd) It takes the cheapest(fastest)way to execute command - Query optimiser
+     It uses dependency tree and cardinality estimation
+-3.5)  for cardinality estimation- let say it wants 3 or 4 rows then it will use index otherwise if has to query millions then it will use just scans the disl
+-3.75)FROM AND JOIN-> WHERE->GROUP BY->HAVING->SELECT->DISTINCT->ORDER BY->LIMIT
+- 4) then execution engine then storage engine 
+- 5) in storage engine comes buffer manager- reading from hard drive is incredibly slow. the buffer manager tries to keep most used data in RAM
+
+
+# PROBLEM IN RAM(IN MEMORY)
+-The biggest limitation of an In-Memory database is volatility (lack of durability).
+
+ requires continuous electricity to hold data. If the server crashes, a software bug happens, or the data center loses power, everything in RAM is instantly wiped out.
+
+-To solve this, memory databases still have to talk to the disk. They constantly write a "log" of their actions to a cheap hard drive (using the Recovery Manager we learned about on the last page!). That way, when the power comes back on, they can read the log and rebuild the data back into RAM.
+
+# HOW ram keeps updated data
+1) sequential write-ahead log- everytime we change it upadate ram as well as keep a log file and it snapshot the data at particula time to write to disk..
+and the old logs gets cleared off called checkpointing
+
+
+## Question- if we have to write wal (write ahead log)in disk only cant we directly write on disk 
+- Answer- simply wal is written in sequential I/O and not a random I/O .. in seuquential I/o we dont have to search index .. we just write directy this was updated at this time.. whearas in random i/o we have to find that particular index and give I/O
+
+## Row vs column based storage
+- Row
+-THIs how POSTGRE OR SQL WORKS (OLTP DATABASES) we store data in contiguous block
+-column -monet or snowflake
+- in row we have to read whole chunk of data which might be unnecesary 
+- in column we have to read only sequential data
+-The author gives a perfect, practical example of when a Row-Oriented layout is superior: User Registration.
+Imagine John fills out a sign-up form on your website. He hits "Submit," and your backend needs to save his Name, Birth Date, and Phone Number.
+Because a row-oriented database stores all these fields together, it can write John's entire profile to the hard drive in one single, fast block write. If the database were column-oriented, it would have to open three different physical files to save John's data, which is much slower for this specific task.
+
+## in column partitioning it keeps each column in diff files how does it know that this belongs to the 3rd person
+- answer - two ways
+- u can store id as well with the column but will cause duplication
+- virtual ids
+-How does the hard drive physically jump to Virtual ID #5,000,000 without reading the first 4,999,999 records? It uses fixed-width data and pointer arithmetic.
+
+When you define a table, the database assigns a strict byte size to the columns. Let's say a Price column is defined as a 32-bit integer. That means every single price takes up exactly 4 bytes of space on the hard drive, no exceptions.
+
+If the database wants to reconstruct Row #5,000,000, it performs this exact calculation:
+
+Item Size: 4 bytes
+
+Target Virtual ID: 5,000,000
+
+The Formula: Target ID * Item Size = 5,000,000 * 4 = 20,000,000
+
+The database tells the hard drive: "Skip the first 20 million bytes of this file, and read the next 4 bytes." It instantly retrieves the exact price for that row. No searching, no scanning, and no actual ID numbers stored on disk!
+
+## but it causes tombstone problem
+Because the Virtual ID is purely based on physical position, order is completely sacred.
+
+If you have 10 rows, and you want to delete Row #3, you cannot just erase the 3rd price from the file. If you did, the 4th price would shift left and become the new 3rd price. Suddenly, Row 4's price belongs to Row 3's symbol, and your entire multi-billion-row database is permanently corrupted.
+
+To fix this, column stores use Tombstones. When you delete Row #3, the database doesn't actually remove the data. It just leaves the physical data right where it is to preserve the spacing, and flips a tiny hidden bit somewhere else that says, "Hey, ignore Virtual ID #3, it's dead."
+
+Here is an interactive visualization of the actual memory math the hard drive does when you ask for a Virtual ID.
+
+# ANOTHER TABLE IS WIDE COLUMN TABLE
+this is nosql database 
+-the data is actually stored row-wise! * It is called "wide" because unlike a strict SQL database, Row 1 might have 5 columns in its profile family, while Row 2 might have 5,000 entirely different columns in its profile family.
+-The JSON-like structure you see in Figure 1-3 is the logical representation of a Webtable—a database used to store crawled web pages for a search engine. Let’s break down exactly how this multidimensional layout works and why it’s designed this way.
+-The 4D Coordinate SystemIn a standard relational database, you find a value using two coordinates: (Row, Column).In a Wide-Column store like Bigtable or Cassandra, it is a multidimensional sorted map. To locate any piece of data, you need up to four coordinates:$$\text{(Row Key, Column Family, Column Qualifier, Timestamp)} \rightarrow \text{Value}$$Looking at the diagram, let's locate the HTML content of CNN at version 6:
+-Notice that the row keys aren't written as www.cnn.com or www.example.com. They are completely reversed: "com.cnn.www".
+
+Why do this? Distributed databases sort row keys alphabetically across multiple servers. If you use standard URLs, sports.cnn.com and money.cnn.com would end up on entirely different servers. By reversing them to "com.cnn.sports" and "com.cnn.money", all pages belonging to the same root domain are grouped alphabetically right next to each other. This guarantees high spatial locality when you want to run analytics on a single website.
+
+-![alt text](image-27.png)
+
+## how data is deleted
+- This section addresses a massive industry secret: Modern databases almost never actually delete data when you tell them to. If you execute DELETE FROM Users WHERE id = 10;, the database does not go into the file, erase the bytes, and shift all the other millions of records up to fill the gap. Shifting data would cause massive random disk I/O and freeze performance.
+
+Instead, they use three steps:
+
+Deletion Markers (Tombstones): The database simply writes a tiny "marker" or flag next to the record (or appends a new record called a tombstone) that states: "As of timestamp X, this ID is dead." When you try to query that user, the database sees the tombstone and returns "Not Found," even though the old bytes are still sitting on the disk.
+
+Shadowed Records: When you update a record, the database might just write a brand-new version of it somewhere else. The old version becomes "shadowed" (outdated/obscured by the new version).
+
+Garbage Collection (Compaction): Periodically, a background thread wakes up to clean the house. It reads an entire page into RAM, sifts out the live records, writes only the live records sequentially into a brand-new clean page on disk, and completely drops the old page containing the deleted or shadowed data.
