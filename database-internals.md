@@ -185,7 +185,7 @@ this is nosql database
 
 Why do this? Distributed databases sort row keys alphabetically across multiple servers. If you use standard URLs, sports.cnn.com and money.cnn.com would end up on entirely different servers. By reversing them to "com.cnn.sports" and "com.cnn.money", all pages belonging to the same root domain are grouped alphabetically right next to each other. This guarantees high spatial locality when you want to run analytics on a single website.
 
--![alt text](image-27.png)
+-![alt text](database-it-images/image-27.png)
 
 ## how data is deleted
 - This section addresses a massive industry secret: Modern databases almost never actually delete data when you tell them to. If you execute DELETE FROM Users WHERE id = 10;, the database does not go into the file, erase the bytes, and shift all the other millions of records up to fill the gap. Shifting data would cause massive random disk I/O and freeze performance.
@@ -199,12 +199,12 @@ Shadowed Records: When you update a record, the database might just write a bran
 Garbage Collection (Compaction): Periodically, a background thread wakes up to clean the house. It reads an entire page into RAM, sifts out the live records, writes only the live records sequentially into a brand-new clean page on disk, and completely drops the old page containing the deleted or shadowed data.
 
 ## Clustered vs Non-clustered
-![alt text](image-28.png)
+![alt text](database-it-images/image-28.png)
 - since it has base data itself thats why we can create only one clustered index
--![alt text](image-29.png)
+-![alt text](database-it-images/image-29.png)
 - here it has references to the base data 
 for non-clustered index
-![alt text](image-30.png)
+![alt text](database-it-images/image-30.png)
 -You can create 10 different non-clustered indexes on 10 different columns (e.g., Email, Phone Number, Last Name, Department). None of them duplicate the heavy base table. They all just store tiny pointers that reference back to that exact same single base table. This is why you can have many of them without destroying your storage capacity.
 
 The Quick Analogy to Remember It:
@@ -213,25 +213,25 @@ The Clustered Index is the actual printed pages of a dictionary (sorted alphabet
 
 The Non-Clustered Indexes are the extra indexes at the back of the book (e.g., an index of words by origin, or an index of words by syllable count). You can have as many of these as you want, because they just point back to the same printed page numbers!
 
-![alt text](image-31.png)
+![alt text](database-it-images/image-31.png)
 
 # How secondary index looks up data
 - Here both has its own pros and cons
 - though in first diagram it has less disk seek but updation cost is expensinve
 - in 2nd u have to update only primary key but con you have to go through primary index
 - mysql inno db decides 2nd is much better than 1st
-![alt text](image-32.png)
+![alt text](database-it-images/image-32.png)
 
 ## pillars of storage engine
-![alt text](image-38.png)
+![alt text](database-it-images/image-38.png)
 -here buffer manager helps to evict also
 - buffered makes the execution very fast but it can lose data
-![alt text](image-33.png)
-![alt text](image-34.png)
-![alt text](image-35.png)
-![alt text](image-36.png)
+![alt text](database-it-images/image-33.png)
+![alt text](database-it-images/image-34.png)
+![alt text](database-it-images/image-35.png)
+![alt text](database-it-images/image-36.png)
 - what does mean by offset?
--![alt text](image-37.png)
+-![alt text](database-it-images/image-37.png)
 
 
 # Chapter-2
@@ -266,7 +266,7 @@ The Non-Clustered Indexes are the extra indexes at the back of the book (e.g., a
 ## 2-3 Node and B tree
 -2-3-Tree Node (The stepping stone): * Contains 2 Keys side-by-side.Contains 3 Pointers (Less than Key 1, Between Key 1 & 2, Greater than Key 2).
 -B-Tree Node: * Contains $N$ Keys (often dozens or hundreds!).Contains $N+1$ Pointers.
-![alt text](image-40.png)
+![alt text](database-it-images/image-40.png)
 
 ## THE TWO STEP SEARCH
 -The RAM Search (Fast): Because keys inside a single B-Tree node are perfectly sorted, the database can use a standard Binary Search algorithm on them. If a single disk block holds 200 keys, the computer loads that entire block into ultra-fast RAM and searches it in microseconds.
@@ -279,7 +279,7 @@ The Non-Clustered Indexes are the extra indexes at the back of the book (e.g., a
 -If you used a standard Binary Tree, every single one of those 32 comparisons might live in a different physical disk block. That equals 32 slow Disk Seeks.
 
 -In a B-Tree with a high fanout (e.g., 100 children per node), the tree is only about 4 or 5 levels deep. You still do 32 logical comparisons, but 28 of them happen instantly in RAM inside the nodes! You only suffer 4 or 5 Disk Seeks (one for each level jump).
-![alt text](image-41.png)
+![alt text](database-it-images/image-41.png)
 
 ## QUESTION
 -1. Does loading the node into RAM cost time?
@@ -306,7 +306,7 @@ If your tree is 3 levels deep, finding a record will always cost exactly 3 Disk 
 
 This is exactly why database engineers created the rule we saw on the last page: High Fanout = Low Height. If you pack 500 children into every single node, your massive 1-billion-row database will only be 4 levels deep. That guarantees the hard drive will never have to do more than 4 Disk Seeks to find any piece of data.
 ```
-![alt text](image-42.png)
+![alt text](database-it-images/image-42.png)
 
 ## 50 % utilization programme
 -The final paragraph notes that B-Trees intentionally leave massive amounts of empty space inside their nodes (sometimes operating at only 50% capacity).
@@ -320,7 +320,7 @@ Why? Because if every node was 100% full, the very next time a user registered o
 -If you do an Insert for ID 25, the database won't find 25. Instead, the algorithm finds its predecessor (e.g., ID 24). It does this so it knows exactly which leaf node has the physical space where ID 25 should be inserted.
 
 ## promotion of node
-![alt text](image-43.png)
+![alt text](database-it-images/image-43.png)
 - Here 70 is pushed above becuase earlier 60|70|80 was there .. and when 75 came it seeks for another page and also 70 gets pushed above so one can know that after 70 there is split
 
 ## demotion of node while deletion
@@ -329,3 +329,89 @@ Why? Because if every node was 100% full, the very next time a user registered o
 -The Trigger: We delete 16. The left node now only has [15]. It underflows.
 
 -The Merge: The database checks the right neighbor [20, 25]. Together, 15, 20, and 25 easily fit into a single 3-slot node. It combines them into a single leaf block.
+-![alt text](database-it-images/image-45.png)
+
+## no of nodes
+![alt text](database-it-images/image-44.png)
+# Chapter-3
+## Garbage collection
+-In RAM: If you delete 1,000 objects, you don't really care where those empty holes are. The OS and your programming language handle the "Garbage Collection" and will seamlessly reuse that space or ignore it without a performance hit.
+
+-On Disk: If you delete 1,000 database rows, you now have 1,000 tiny holes scattered across your hard drive. This is called Fragmentation. The hard drive will not clean this up for you. As a database developer, you have to build a custom tracking system to remember exactly where those holes are so you can recycle them for new inserts. If you don't, your database file will bloat infinitely.
+
+## problem of serialization and deserilazation
+-Serialization: The act of translating a complex piece of data (like the number 1,000,000 or the word "Hello") into a strict sequence of raw bytes so it can be written to disk.
+- happens when we read from disk
+-Deserialization: Reading those raw bytes back off the disk and reconstructing them into the original number or word.
+
+## How we read strings
+-Null terminated(c way)- end with null or /0
+- pascal way- have a length in front of string [8]abhishek
+## Bit packing
+-A boolean is a simple True or False. In computer hardware, that only requires 1 bit (a 1 or a 0).
+H-owever, the absolute smallest unit of memory a computer can allocate is a Byte (which is 8 bits). If you save a simple True boolean normally, you use 1 bit for the data and waste 7 bits of empty space.
+
+-To fix this, engineers use Bit-Packing. They take 8 different boolean settings and stuff them all into a single byte!
+
+## how record layout
+-![alt text](database-it-images/image-46.png)
+![alt text](database-it-images/image-47.png)
+-Page IDs (Global): When an internal routing cell points to a child node, it uses a Page ID (like "Go to Page #50"). The database uses a separate master lookup table to figure out where Page #50 physically lives on the multi-gigabyte hard drive.
+
+-Offsets (Local): Inside a single 4 KB slotted page, the pointers in the slot array don't use massive, heavy Page IDs. They use tiny, lightweight Offsets (like "Jump to byte #145"). These coordinates only make sense relative to the start of that specific page.
+![alt text](database-it-images/image-48.png)
+## What happens if you have ten tiny 10-byte holes scattered around the page, and you need to insert an 80-byte record?
+-You technically have 100 bytes of free space, but no single hole is big enough to hold the record!
+
+-This is when the database is finally forced to do the heavy lifting: Defragmentation. It briefly locks the page, physically scoops up all the live data cells, and shoves them tightly together at the end of the page.
+- All those tiny scattered holes are merged into one massive, contiguous block of free space, allowing the 80-byte record to finally be inserted.
+-![alt text](database-it-images/image-49.png)
+## protection-
+##Checksumming (Protecting Against Hardware Decay)
+-Hard drives are physical objects, and they are imperfect. Sometimes, due to a microscopic scratch, a power surge, or even cosmic rays, a 0 on your hard drive might spontaneously flip to a -1. This is called "bit rot" or silent data corruption.
+
+-If a database reads corrupted data without realizing it, it could charge a customer $10,000 instead of $10. To prevent this, databases use Checksums and CRCs (Cyclic Redundancy Checks).
+
+-How it works: Before the database writes a 4 KB page to the disk, it runs all the data through a math formula to generate a tiny "signature" (the checksum). It saves this signature in the Page Header. Later, when it reads the page back into RAM, it runs the math again. If the new signature doesn't perfectly match the saved signature, the database immediately knows the hardware corrupted the data, and it throws an error instead of using it.
+
+-Checksum vs. CRC: Basic checksums (like simple addition) are fast but weak. If two bits flip at the same time, they might cancel each other out, and the basic checksum wouldn't notice. CRCs use more complex polynomial math to detect "burst errors" (multiple corrupted bits in a row), making them much safer for storage drives
+
+
+# chapter -4
+-The Page Header (The Metadata)
+-Just like a file has a header, every single fixed-size block (page) inside the file also has its own mini-header. The Page Header acts as the dashboard for that specific 4 KB chunk of memory.
+
+-Before the database even looks at the data records, it reads the header to understand the layout. The text highlights that headers typically track:
+
+-Flags: Tiny bits that describe the page type (e.g., "Is this an internal routing page or a leaf data page?").
+
+-Cell Count: Exactly how many records are currently stored on this page.
+
+-Offsets (The Free Space Boundaries): Remember the Slotted Page from Chapter 3? The pointers grew from the top down, and the data grew from the bottom up. The header stores the exact byte coordinates (lower and upper offsets) of where that "free space" gap currently starts and ends, so it knows exactly where to append the next piece of data.
+
+## THE high key concept
+- there is a special key kn+1 so that last pointer dont feel left out at the end
+-Instead of leaving the rightmost pointer as an unpaired orphan, this architecture artificially adds one extra key to the node: the High Key ($K_{N+1}$).This High Key does not represent a standard routing boundary between two child nodes. Instead, it represents the absolute maximum value that is allowed to exist anywhere in that node's entire subtr
+
+## advantages of high key
+-) Using $+\infty$ as a virtual key: In a standard B-Tree, the final pointer ($P_2$) handles everything greater than or equal to $K_2$. Its upper bound is literally infinity. The database just assumes "anything bigger than $K_2$ goes down this path."(
+ -b) Storing the High Key: In this approach, the final pointer ($P_2$) is strictly bounded. It handles values from $K_2$ up to a strict ceiling of $K_3$.
+
+ - one more reason is concuurency support
+ -easy for locking
+ -Why does PostgreSQL do this? The author notes this is tied to Concurrency (specifically B$^\text{link}$-Trees). If you have thousands of users reading and writing to the tree simultaneously, having strict upper boundaries on every single node makes it significantly easier to lock specific portions of the tree without accidentally blocking queries that belong in a different subtree.
+
+ ## the chopped database-it-images/image concept
+ -To maintain performance, the database doesn't just put the entire massive record into the overflow page. It wants to keep the beginning of the record on the Primary Page so it can still read the keys and headers quickly.
+
+-Databases enforce a strict max_payload_size limit for any single cell.
+Look at Figure 4-6:
+
+-The Chop: When Payload1 exceeds the maximum allowed size, the database literally chops the data in half.
+
+-The Anchor: The first chunk of Payload1 is saved safely on the Primary Page.
+
+-The Spill: The remaining bytes of Payload1 "spill" over into the Overflow Page.
+
+-The Pointer: A pointer is embedded at the end of the first chunk, telling the database exactly where to find the rest of the chopped-up data.
+
