@@ -46,3 +46,40 @@
 
 ### S3 storage classes
 - we can created different type of s3 class based on access/storage pattern
+- when u are uploading something , there are some properties option
+- ![alt text](image-8.png)
+- S3 standard(general)-99..99% availabilty - is used for frequent access, low latency,high throughput
+- S3 standard(infrequent access)-good for data which is not frequently access but requires rapid access when needed, availiabilty-99.99%,low cost 
+- S3 one zone infrequent access
+- S3 glacier instant retreival-low cost , ms retrieval,very less access
+- S3 glacier flexible retreival-(1-5)best, 12hr bad,very less access
+- S3 glacier deep archive- 48 hr retreival ,very less access
+- S3 intelligent tiering- automatically aws will determine which will be fast, but will cost due to aws management
+
+- they are identfied by (durability and availability)
+- for durability for all storage classes it is 99.99%
+-for availability it is different for storage classes - means how much it is readily available 
+
+### life cycle route
+- in management
+-![alt text](image-9.png)
+-![alt text](image-10.png)
+-![alt text](image-11.png)
+- so what it does let say you can urself determine after how many days you want to transitition in which storage class
+-1) transpiration access- storage classes gets changed
+-2) expiration access - older versions gets deleted
+
+### S3 update notifications
+-this can work as a trigger( producer)
+- assume we do some actions on objects store in a bucket. and we want to fire notifications, this can be achiedved thrugh event listeners
+- on diff services - (SNS,SQS,lambda)consumption
+
+### AWS S3 performance
+-S3 auto scales for reducing latency
+- for any read/get request-5500 req per second per prefix
+-write-3500 req per second
+- system->s3 ( u can upload in multiparts)
+- normal flow kya hai( client->backend->s3)
+-client->backend se presigned url aur backend->s3->backend->client ...phir client diretcly frontend se upload kr skta hai
+- S3 byte range fetch
+
