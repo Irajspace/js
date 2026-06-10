@@ -54,7 +54,7 @@ but lets say i want whenever products change it should call the api so how to do
 ```
 
 ```
-Solution-
+Solution- 
 Your understanding is almost correct. Let's trace it carefully.
 
 useEffect(() => {
@@ -78,7 +78,7 @@ setProducts(data.products);
 
 changes state.
 
-Whenever state changes, React re-renders the component.
+Whenever state changes, React re- renders the component.
 
 Render #2
 products = [all products]
@@ -159,7 +159,7 @@ useEffect(() => {
   };
 
   fetchProducts();  
-}, [refreshTrigger]); // <-- Runs whenever refreshTrigger changes
+}, [refreshTrigger]); // <- -  Runs whenever refreshTrigger changes
 
 // In your JSX:
 <button onClick={() => setRefreshTrigger(prev => prev + 1)}>
@@ -170,7 +170,7 @@ int overflow
 Is there a better way?
 Even though the number counter is 100% safe from crashing, if the idea of an infinitely growing number still bothers your engineering instincts, you can completely avoid it by using an object reference instead.
 
-Since React triggers a re-render whenever an object reference changes in memory, you can do this:
+Since React triggers a re- render whenever an object reference changes in memory, you can do this:
 
 JavaScript
 const [refreshTrigger, setRefreshTrigger] = useState({}); // Empty object
@@ -199,7 +199,7 @@ useEffect(() => {
   };
 
   fetchProducts();  
-}, [category]); // <-- Safely runs only when the 'category' changes
+}, [category]); // <- -  Safely runs only when the 'category' changes
 
 // In your JSX:
 <button onClick={() => setCategory("laptops")}>
@@ -221,12 +221,12 @@ const Products=()=>{
   const fetchProducts = async () => {
  try{
     setIsloading(true)
-    setIserror(null);-> ye pehle error ko remove krega
+    setIserror(null);- > ye pehle error ko remove krega
     const response = await fetch(
       "https://dummyjson.com/products"
-    );-> isme ye error ni dega agar url galat hai
+    );- > isme ye error ni dega agar url galat hai
     
-    const data = await response.json();- ye error dega isliey axios use kro
+    const data = await response.json();-  ye error dega isliey axios use kro
 
     setProducts(data.products);
     setIsloading(false)
@@ -257,15 +257,15 @@ so error handle ke liye
 
 ```
 ### Tanstack Query
-![alt text](image-68.png)
+![alt text](image- 68.png)
 
 ```
 
-useQuery(Tanstack Query)-> koi chiz fetch krna hai tab use krte hain
-useMutation -jab server mein kuch changes krne hain
+useQuery(Tanstack Query)- > koi chiz fetch krna hai tab use krte hain
+useMutation - jab server mein kuch changes krne hain
 
 
-first import {QueryCLient,QueryClientProvider}from "@tanstack/react-query"
+first import {QueryCLient,QueryClientProvider}from "@tanstack/react- query"
 then wrap the app with Queryclient provider
 
 
@@ -301,9 +301,9 @@ const {isLoading,data:products,error}=useQuery({querKey:["products"],queryfnc:[f
 
 
 
-Welcome to the bright side! Moving from manual useEffect fetching to TanStack Query (formerly React Query) is a massive upgrade. It handles caching, loading states, errors, and re-fetching automatically so you don't have to invent your own refreshTrigger state variables.
+Welcome to the bright side! Moving from manual useEffect fetching to TanStack Query (formerly React Query) is a massive upgrade. It handles caching, loading states, errors, and re- fetching automatically so you don't have to invent your own refreshTrigger state variables.
 
-Let's break down exactly what is happening in your screenshot, addressing your questions step-by-step.
+Let's break down exactly what is happening in your screenshot, addressing your questions step- by- step.
 
 1. Where is it taking products from?
 In the screenshot, you see this line:
@@ -359,10 +359,10 @@ isLoading switches to false.
 
 The data is assigned to your products variable.
 
-The component re-renders to display your items.
+The component re- renders to display your items.
 
 How to trigger a refresh now?
-Remember how you had to create a custom counter to trigger a refresh in your useEffect? With TanStack Query, you don't need that. If you want a refresh button, TanStack gives you a built-in function called refetch:
+Remember how you had to create a custom counter to trigger a refresh in your useEffect? With TanStack Query, you don't need that. If you want a refresh button, TanStack gives you a built- in function called refetch:
 
 JavaScript
 const { data: products, isLoading, refetch } = useQuery({ 
@@ -385,7 +385,7 @@ phir error state load hota hai
 
 ```
 #Staletime
-![alt text](image-69.png)
+![alt text](image- 69.png)
 ```
 default infinite hota hai
 otherwise u can put 10000 milliseconds daal skte ho is milliseconds ke baad cache se ht jayega phir jab maangoge toh phir se fetch krega
@@ -426,7 +426,7 @@ querykey mein ['products',params.productId]
 
 ```
 ## use mutation
-![alt text](image-70.png)
+![alt text](image- 70.png)
 ```
 Now that you know how useQuery handles fetching data, this screenshot introduces its sibling: useMutation.
 
@@ -461,14 +461,14 @@ mutation.mutate(...): This is the trigger handle. When the user clicks the butto
 Passing Data: The object inside—{ id: new Date(), title: 'Do Laundry' }—is passed directly into the newTodo parameter of your mutationFn up top.
 
 3. Tracking States: The UI Lifecycle
-The object returned by the hook (assigned to the variable mutation) contains built-in state variables that change automatically as the network request progresses. The JSX in the screenshot uses these variables to conditionally render different parts of the UI:
+The object returned by the hook (assigned to the variable mutation) contains built- in state variables that change automatically as the network request progresses. The JSX in the screenshot uses these variables to conditionally render different parts of the UI:
 
 State A: The Loading State (mutation.isLoading)
 JavaScript
 {mutation.isLoading ? (
   'Adding todo...'
 ) : ( ... )}
-The moment the button is clicked and the network request is mid-flight, mutation.isLoading becomes true. The UI hides the button and shows the text "Adding todo...". This prevents users from clicking the button multiple times and creating duplicate items.
+The moment the button is clicked and the network request is mid- flight, mutation.isLoading becomes true. The UI hides the button and shows the text "Adding todo...". This prevents users from clicking the button multiple times and creating duplicate items.
 
 Note: If you are using TanStack Query v5, isLoading has been renamed to isPending, but it behaves exactly the same way.
 
@@ -484,7 +484,7 @@ JavaScript
 {mutation.isSuccess ? <div>Todo added!</div> : null}
 If the backend successfully saves the data and returns a 200/201 status code, mutation.isSuccess becomes true, and the UI displays "Todo added!".
 
-The Complete Step-by-Step Flow
+The Complete Step- by- Step Flow
 Idle State: The page loads. Nothing is happening yet. The button "Create Todo" is visible.
 
 The User Clicks: mutation.mutate() fires with the laundry todo data.
@@ -503,26 +503,26 @@ If failed: isLoading becomes false, isError becomes true. The UI displays the er
 ```
 
 ## Paginated Queries
-- skip and limit url mein rkhna betterhot hai
--Pagination in modern web development generally revolves around two core parameters: Limit (how many items you want to fetch) and Skip (how many items you want to jump over before starting to grab that data).
+-  skip and limit url mein rkhna betterhot hai
+- Pagination in modern web development generally revolves around two core parameters: Limit (how many items you want to fetch) and Skip (how many items you want to jump over before starting to grab that data).
 
--When you combine this API pattern with TanStack Query (React Query), you have to solve a specific UI problem: Flickering. If a user clicks "Next Page", you don't want the current list to vanish into a blank loading screen before the new data arrives.
+- When you combine this API pattern with TanStack Query (React Query), you have to solve a specific UI problem: Flickering. If a user clicks "Next Page", you don't want the current list to vanish into a blank loading screen before the new data arrives.
 
--Here is the standard, modern way to handle this in TanStack Query v5 using skip, limit, and a feature called keepPreviousData.
+- Here is the standard, modern way to handle this in TanStack Query v5 using skip, limit, and a feature called keepPreviousData.
 
--The Math: Converting Pages to Skip/Limit
+- The Math: Converting Pages to Skip/Limit
 Most UI components use "Page Numbers" (Page 1, Page 2), but backend databases usually speak in "Skip/Limit" (or Offset/Limit). You bridge this gap with a simple formula:
 
--limit: A static number (e.g., 10 items per page).
+- limit: A static number (e.g., 10 items per page).
 
--skip: (page - 1) * limit
+- skip: (page -  1) * limit
 
--Page 1: (1 - 1) * 10 = 0 skipped.
+- Page 1: (1 -  1) * 10 = 0 skipped.
 
--Page 2: (2 - 1) * 10 = 10 skipped.
+- Page 2: (2 -  1) * 10 = 10 skipped.
 ```
 import { useState } from 'react';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react- query';
 
 // 1. Your API fetching function
 const fetchProducts = async (skip, limit) => {
@@ -538,7 +538,7 @@ export default function PaginatedProducts() {
   const limit = 10;
   
   // 3. Calculate skip for the API
-  const skip = (page - 1) * limit;
+  const skip = (page -  1) * limit;
 
   // 4. The TanStack Query Hook
   const { 
@@ -570,9 +570,9 @@ export default function PaginatedProducts() {
         ))}
       </ul>
 
-      <div className="pagination-controls">
+      <div className="pagination- controls">
         <button 
-          onClick={() => setPage(old => Math.max(old - 1, 1))} 
+          onClick={() => setPage(old => Math.max(old -  1, 1))} 
           disabled={page === 1}
         >
           Previous
@@ -608,21 +608,21 @@ isPlaceholderData is your tool to tell the user "Please wait..." and to lock the
 
 # but above code has a flow if user is on page 5 on refresh it will go back to page 1 so to persist it we keep skip and limit on the url
 
--You just anticipated the next major production requirement!
+- You just anticipated the next major production requirement!
 
--The code provided before will not persist on a browser refresh. Because we used standard useState(1), the moment the user hits refresh, the browser's memory is completely wiped clean, and your app resets back to Page 1.
+- The code provided before will not persist on a browser refresh. Because we used standard useState(1), the moment the user hits refresh, the browser's memory is completely wiped clean, and your app resets back to Page 1.
 
--If a user is on Page 5, refreshes the page, and suddenly gets kicked back to Page 1, they will likely find it frustrating. Furthermore, they cannot copy the URL and text it to a friend to show them the exact items on Page 5.
+- If a user is on Page 5, refreshes the page, and suddenly gets kicked back to Page 1, they will likely find it frustrating. Furthermore, they cannot copy the URL and text it to a friend to show them the exact items on Page 5.
 
--To fix this, the industry standard is to store your page (and filters) directly in the URL query parameters (e.g., ?page=2) instead of React local state.
+- To fix this, the industry standard is to store your page (and filters) directly in the URL query parameters (e.g., ?page=2) instead of React local state.
 
--The Production Standard: URL-Driven State
+- The Production Standard: URL- Driven State
 Here is how you update the pattern using React Router (the most common routing library in React) via its useSearchParams hook.
 
--Notice how useState is completely removed for managing the page:
+- Notice how useState is completely removed for managing the page:
 ```
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom'; // 1. Import from your router
+import { useQuery, keepPreviousData } from '@tanstack/react- query';
+import { useSearchParams } from 'react- router- dom'; // 1. Import from your router
 
 const fetchProducts = async (skip, limit) => {
   const response = await fetch(`https://api.example.com/products?skip=${skip}&limit=${limit}`);
@@ -639,7 +639,7 @@ export default function PaginatedProducts() {
   const limit = 10;
   
   // 4. Calculate skip just like before
-  const skip = (page - 1) * limit;
+  const skip = (page -  1) * limit;
 
   const { data, isLoading, isPlaceholderData } = useQuery({
     queryKey: ['products', { skip, limit }],
@@ -660,9 +660,9 @@ export default function PaginatedProducts() {
     <div>
       {/* ... Your product list mapping here ... */}
 
-      <div className="pagination-controls">
+      <div className="pagination- controls">
         <button 
-          onClick={() => handlePageChange(Math.max(page - 1, 1))} 
+          onClick={() => handlePageChange(Math.max(page -  1, 1))} 
           disabled={page === 1}
         >
           Previous
@@ -690,7 +690,7 @@ export default function PaginatedProducts() {
 ```
 Right after wiping everything, the browser downloads your HTML and JavaScript files all over again from scratch.
 
-When your JavaScript bundle loads into this brand-new, empty memory space, your React code runs from top to bottom like it’s the very first time it has ever seen the light of day:
+When your JavaScript bundle loads into this brand- new, empty memory space, your React code runs from top to bottom like it’s the very first time it has ever seen the light of day:
 Why the URL Method Survives the Refresh
 This is exactly why storing state in the URL (?page=3) is so powerful.
 
@@ -700,26 +700,26 @@ When you hit refresh on mysite.com/products?page=3, the browser still nukes the 
 
 ## how to add search 
 
--How the Whole System Works Together
--1. The "Input Buffer" Pattern (Local State vs URL State)
--You might wonder why we have both searchInput (local state) and search (from URL).
--If you hook the <input> directly to the URL parameters, the app will execute a network request on every single keystroke your user types. If they type "laptop", it will trigger 6 separate API calls in half a second.
--Instead, we use searchInput to let them type freely. The URL only updates when they hit Enter or click "Search".
+- How the Whole System Works Together
+- 1. The "Input Buffer" Pattern (Local State vs URL State)
+- You might wonder why we have both searchInput (local state) and search (from URL).
+- If you hook the <input> directly to the URL parameters, the app will execute a network request on every single keystroke your user types. If they type "laptop", it will trigger 6 separate API calls in half a second.
+- Instead, we use searchInput to let them type freely. The URL only updates when they hit Enter or click "Search".
 
--2)TanStack Query creates separate, isolated cache compartments for every unique combination of your key array.
--Page 1 of all products (['products', {skip: 0, limit: 10, search: ''}]) gets its own cache compartment.
--Page 1 of "phone" (['products', {skip: 0, limit: 10, search: 'phone'}]) gets a completely different cache compartment.
--This ensures that jumping back and forth between search terms and different pages feels instant if the data was fetched previously.
+- 2)TanStack Query creates separate, isolated cache compartments for every unique combination of your key array.
+- Page 1 of all products (['products', {skip: 0, limit: 10, search: ''}]) gets its own cache compartment.
+- Page 1 of "phone" (['products', {skip: 0, limit: 10, search: 'phone'}]) gets a completely different cache compartment.
+- This ensures that jumping back and forth between search terms and different pages feels instant if the data was fetched previously.
 
--3)Why setSearchParams({ search: searchInput, page: '1' }) is Crucial
--Notice inside handleSearchSubmit, we forcefully append page: '1'.
--If a user clicks out to Page 4 of your catalog, their URL is ?page=4. If they type "shoes" into the search bar and press enter, without resetting the page parameter, the URL would update to ?search=shoes&page=4.
+- 3)Why setSearchParams({ search: searchInput, page: '1' }) is Crucial
+- Notice inside handleSearchSubmit, we forcefully append page: '1'.
+- If a user clicks out to Page 4 of your catalog, their URL is ?page=4. If they type "shoes" into the search bar and press enter, without resetting the page parameter, the URL would update to ?search=shoes&page=4.
 
--TanStack query would confidently ask the backend for the 4th page of shoe results. If you only have 3 shoes in your store, the API returns an empty array, and your user sees a broken, blank page. Forcing it back to page: '1' resets the grid perfectly for the new query scope.
+- TanStack query would confidently ask the backend for the 4th page of shoe results. If you only have 3 shoes in your store, the API returns an empty array, and your user sees a broken, blank page. Forcing it back to page: '1' resets the grid perfectly for the new query scope.
 ```
 import { useState } from 'react';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+import { useQuery, keepPreviousData } from '@tanstack/react- query';
+import { useSearchParams } from 'react- router- dom';
 
 // 1. API fetcher now accepts search, skip, and limit
 const fetchProducts = async (skip, limit, search) => {
@@ -740,7 +740,7 @@ export default function SearchablePaginatedProducts() {
   const page = parseInt(searchParams.get('page') || '1', 10);
   const search = searchParams.get('search') || '';
   const limit = 10;
-  const skip = (page - 1) * limit;
+  const skip = (page -  1) * limit;
 
   // 3. Local state for the input field (Acts as a "buffer")
   const [searchInput, setSearchInput] = useState(search);
@@ -786,15 +786,15 @@ export default function SearchablePaginatedProducts() {
       {/* Product List */}
       <ul>
         {data?.products?.map(product => (
-          <li key={product.id}>{product.title} - ${product.price}</li>
+          <li key={product.id}>{product.title} -  ${product.price}</li>
         ))}
         {data?.products?.length === 0 && <li>No products found.</li>}
       </ul>
 
       {/* Pagination Controls */}
-      <div className="pagination-controls" style={{ marginTop: '20px' }}>
+      <div className="pagination- controls" style={{ marginTop: '20px' }}>
         <button 
-          onClick={() => handlePageChange(Math.max(page - 1, 1))} 
+          onClick={() => handlePageChange(Math.max(page -  1, 1))} 
           disabled={page === 1 || isPlaceholderData}
         >
           Previous
