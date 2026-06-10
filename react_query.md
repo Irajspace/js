@@ -257,7 +257,7 @@ so error handle ke liye
 
 ```
 ### Tanstack Query
-![alt text](image- 68.png)
+![alt text](image-68.png)
 
 ```
 
@@ -385,7 +385,7 @@ phir error state load hota hai
 
 ```
 #Staletime
-![alt text](image- 69.png)
+![alt text](image-69.png)
 ```
 default infinite hota hai
 otherwise u can put 10000 milliseconds daal skte ho is milliseconds ke baad cache se ht jayega phir jab maangoge toh phir se fetch krega
@@ -426,7 +426,7 @@ querykey mein ['products',params.productId]
 
 ```
 ## use mutation
-![alt text](image- 70.png)
+![alt text](image-70.png)
 ```
 Now that you know how useQuery handles fetching data, this screenshot introduces its sibling: useMutation.
 
