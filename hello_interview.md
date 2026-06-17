@@ -547,7 +547,27 @@ expensive queries backend
 
 
 ```
+## what does mean by stronlgy typed?
 
+```
+GraphQL is a strongly typed language. Before a GraphQL server can run, you have to write a strict "Schema" (a contract).
+
+GraphQL
+type User {
+  id: ID!
+  username: String!
+  age: Int!        # This MUST be an integer. The '!' means it cannot be null.
+  isOnline: Boolean!
+}
+It slows down initial development. You can't just hack things together quickly; you have to meticulously define the type of every single piece of data in your system before you can write the actual logic.
+```
+![alt text](image-71.png)
+
+## the N+1 
+```
+The GraphQL Way (Server-Side N+1): The mobile phone makes exactly one request over that weak 3G network. Your GraphQL server receives it. Your server then makes the 101 requests to the database/APIs. Because your server and your database usually live inside the exact same AWS Datacenter, connected by literal fiber-optic cables, those 101 requests happen in a fraction of a millisecond
+
+```
 Rule of thumb for system design
 Small filters/search parameters → GET
 Large request data → POST
@@ -589,3 +609,510 @@ This means:
 "I already have version abc123. Has it changed?"
 ```
 
+## The grpc
+```
+. The Core Engine: Protocol Buffers (Protobufs)
+The image introduces Protocol Buffers as the replacement for JSON. Just like GraphQL, gRPC is heavily typed. You have to write a strict contract before any servers can communicate.
+
+Look at the first code block:
+
+Protocol Buffers
+message User {
+  string id = 1;
+  string name = 2;
+}
+This is the schema. But notice the = 1 and = 2. Those aren't values; those are positional tags. You are telling the system, "ID is always the first piece of data, and Name is always the second piece of data." ### 2. The Magic Trick: JSON vs. Binary (The Weight Loss)
+The middle of the image is the most important part. It visually demonstrates exactly why gRPC is so much faster than REST.
+The gRPC/Protobuf Solution:
+Because both Server A and Server B already have a copy of the Protobuf schema (the contract we wrote in step 1), they don't need the keys anymore.
+Server A just encodes the raw values ("123" and "John Doe") into a pure machine-readable binary stream based on those = 1 and = 2 positional tags.
+
+The image shows this exact same data squashed down into hexadecimal machine code: 0A 03 31 32...
+
+It only takes 15 bytes.
+
+By stripping out all the curly braces, quotes, and key names, gRPC shrinks network payloads by 60-80%. It also requires far less CPU power because the server doesn't have to parse a giant text string; it just reads raw binary
+
+
+```
+## how grpc is fast
+```
+Here is the secret to why gRPC is so incredibly fast: gRPC pays the cost during Build Time, while REST pays the cost during Run Time.
+
+1. The gRPC Way (Build-Time Cost)
+When you say the schema "must be known beforehand," you are entirely correct. But the server doesn't figure this out while it's running.
+
+When a developer writes a gRPC service, they use a compiler (called protoc). Before the server is even turned on, this compiler reads the .proto file and physically generates hard-coded JavaScript, Go, or Java code.
+
+The "cost" is paid once, by the developer's laptop, before the code is ever deployed.
+
+By the time the server is running and receiving live traffic, it already natively understands that "Tag 1 = ID". It doesn't have to think; it just executes.
+
+2. The REST Way (Run-Time Cost)
+JSON is "self-describing." Because there is no strict beforehand contract, the REST server has to figure out the schema on the fly, every single time a request hits it.
+
+If your REST server receives 10,000 requests per second, it has to read the string "id": 1 and parse it into computer memory 10,000 separate times.
+
+Why Your Conclusion is Spot On
+As you correctly deduced, stripping all of this beforehand work out of the runtime environment gives servers a massive advantage in two ways:
+
+Network Latency (Bandwidth): As you pointed out, the network body takes up far less physical space. Sending 15 bytes over a fiber optic cable is mathematically faster than sending 40 bytes. When you have millions of requests, those saved bytes prevent network traffic jams.
+
+CPU Latency (Processing): Computers do not naturally speak "Strings" (text). They speak binary. When a REST server receives a JSON string, the CPU has to work hard to translate that text into a usable memory object (Deserialization). gRPC skips this entirely. The data arrives as raw binary, and the CPU reads it instantly.
+
+
+```
+## how request looks like
+```
+message GetUserRequest {
+  string id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+service UserService {
+  rpc GetUser (GetUserRequest) returns (GetUserResponse);
+}
+
+```
+## stub baby stubs
+```
+The text mentions: "These definitions are compiled into a client and server stub..." This is the exact "beforehand" compilation cost you mentioned earlier. When you run the gRPC compiler, it generates a piece of code called a Stub.
+
+The Client Stub: Imagine you have a Node.js server that needs to talk to a Python server. The compiler generates a Node.js Stub. Your Node.js developer just writes UserService.GetUser({ id: "123" }). The Stub intercepts that local function call, automatically translates it into that tiny 15-byte binary stream, and shoots it over the network.
+
+The Server Stub: The compiler also generates a Python Stub. This stub catches the incoming binary, translates it back into a native Python object, and hands it to the Python developer's logic.
+
+Neither developer ever has to write code to parse JSON, manage HTTP headers, or write network routing logic. The Stubs handle all of it natively.
+
+
+```
+## golang
+```
+package main
+
+import (
+	"context"
+	"log"
+	"net"
+
+	"google.golang.org/grpc"
+	
+	// This is the package generated by the protoc compiler at build time
+	pb "your_project/generated/users" 
+)
+
+// 1. THE SERVER STRUCT
+// We create a struct to hold our server. We embed the "Unimplemented" server
+// generated by gRPC to ensure forward compatibility if the .proto file changes later.
+type server struct {
+	pb.UnimplementedUserServiceServer
+}
+
+// 2. THE RPC IMPLEMENTATION (The actual logic)
+// This signature exactly matches the `rpc GetUser` definition from our .proto file.
+// Notice how it takes a context and the strictly-typed GetUserRequest.
+func (s *server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
+	log.Printf("Received a gRPC request for User ID: %s", req.GetId())
+
+	// In a real application, you would query your database here.
+	// For this example, we will just return a hardcoded response.
+	
+	// We construct the strictly-typed GetUserResponse to send back
+	return &pb.GetUserResponse{
+		User: &pb.User{
+			Id:   req.GetId(),
+			Name: "John Doe",
+		},
+	}, nil
+}
+
+// 3. STARTING THE ENGINE
+func main() {
+	// Open a raw TCP connection on port 50051 (The standard gRPC port)
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	// Create a brand new, empty gRPC server
+	grpcServer := grpc.NewServer()
+
+	// Register our custom 'server' struct with the newly created gRPC engine
+	pb.RegisterUserServiceServer(grpcServer, &server{})
+
+	log.Printf("gRPC server is running and listening at %v", lis.Addr())
+
+	// Start accepting incoming binary traffic!
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+}
+
+
+```
+## try to implement benchmarks test like this
+https://medium.com/@i.gorton/scaling-up-rest-versus-grpc-benchmark-tests-551f73ed88d4
+
+## server -side events
+```
+1. The Problem: Polling vs. Waiting
+If a browser wants live updates using standard REST, it historically had two terrible options:
+
+Polling: The browser blindly sends a GET /score request every 1 second, just in case something changed. This creates massive, unnecessary network traffic and crushes your server.
+
+The Giant Blob (Top of the image): As the image shows, standard HTTP requires the server to build a single, cohesive JSON object. If you request 100 events, the server holds the connection open, waits until all 100 events have happened, packages them into a single array, and sends them all at once. The user stares at a loading spinner the entire time.
+
+
+
+```
+## the sse strucuture
+```
+The Format: Notice the bottom code block uses data: {...}. This is the strict format required by the SSE spec. The server sends data: , followed by your JSON, followed by two newline characters (\n\n), which tells the browser, "That's the end of this specific message, update the screen!"
+
+One-Way Street: SSE is strictly Server-to-Client. The browser opens the connection, but only the server can push data down it.
+
+```
+## the code
+```
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"time"
+)
+
+func sseHandler(w http.ResponseWriter, r *http.Request) {
+	// 1. Set the mandatory headers for SSE
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	// 2. Check if the server actually supports flushing
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming unsupported!", http.StatusInternalServerError)
+		return
+	}
+
+	// 3. Stream 5 events to the client, one per second
+	for i := 1; i <= 5; i++ {
+		// Format the data exactly as the image showed: "data: {json}\n\n"
+		fmt.Fprintf(w, "data: {\"id\": %d, \"message\": \"Live Update %d\"}\n\n", i, i)
+
+		// 4. FLUSH! This forces the chunk over the network immediately
+		flusher.Flush()
+
+		// Wait 1 second before sending the next event
+		time.Sleep(1 * time.Second)
+	}
+
+	// The function ends, and the HTTP connection finally closes.
+}
+
+func main() {
+	http.HandleFunc("/events", sseHandler)
+	fmt.Println("SSE Server running on :8080")
+	http.ListenAndServe(":8080", nil)
+}
+
+
+```
+## the middlemen problem
+```
+The "Broken Pipe" Problem (Timeouts)
+The second paragraph introduces the biggest enemy of SSE: Middlemen.
+Between your server and the user's phone, the connection passes through Load Balancers, Proxies, and Firewalls. These middlemen hate open, idle connections. They are designed to kill connections that stay open too long to save memory.
+
+The Reality: Your beautiful SSE connection will inevitably get abruptly severed by an aggressive Load Balancer every few minutes.
+
+3. The Built-in Fix: Auto-Reconnect & Last-Event-ID
+Because dropped connections are guaranteed, the SSE standard has a built-in recovery mechanism.
+
+The Client Side: The browser's EventSource object is smart. If the connection drops, it automatically tries to reconnect. When it does, it looks at the id of the last message it successfully read (e.g., Event 100) and sends a special HTTP header to the server: Last-Event-ID: 100.
+
+The Server Side: This puts a massive burden on the backend. Your server cannot just blindly start streaming current events. It has to look at that ID, check a database or cache, find the events the user missed while disconnected (e.g., Events 101, 102, 103), and replay them before sending new ones.
+
+The third paragraph highlights a frustrating edge case. Some corporate firewalls or aggressive antivirus software don't understand streaming.
+
+When they see chunks of data coming through, they intercept them, hold them in a buffer until the connection closes, and then deliver them to the browser all at once.
+
+This completely destroys the real-time nature of SSE, turning it back into the "Giant Blob" we were trying to avoid in the first place.
+
+four mandatory rules
+. Keep the Pipe Open (Connection: keep-alive)
+2. Push Manually (http.Flusher)
+3. Tell the Browser to Listen (Content-Type: text/event-stream)
+The Strict Formatting (data: ... \n\n)
+```
+## the bidirectional way
+```
+The text then pivots to your exact scenario: what if the application requires Bidirectional (Two-Way) Communication? What if you are building a multiplayer browser game, a live chat room, or a collaborative Google Doc where multiple people are typing at the exact same time?
+It is a Persistent, TCP-Style Connection: * Standard HTTP (REST/GraphQL/SSE): Think of this like a Walkie-Talkie. The client presses the button, asks a question, and waits. The server replies. Only one person can talk at a time (Half-Duplex). Even with SSE, the server is just holding the button down and talking continuously; the client still can't talk back.
+
+WebSockets: Think of this like a Telephone Call. The client dials the server. The server picks up. Now the line is completely open in both directions simultaneously (Full-Duplex). Either side can speak at the exact same time without asking permission.
+
+No "Prompting" Required: With a WebSocket, the server can push a chat message to your screen without you ever refreshing the page or asking for it. Conversely, the moment you move your mouse in a multiplayer game, your browser instantly shoots that coordinate data to the server without waiting for an HTTP header to process.
+
+```
+## how connection looks like in websockets
+```
+: If WebSockets are a completely different protocol than HTTP, how does the browser know how to connect to them? The answer is the Upgrade Handshake.
+WebSockets actually start their life as a completely standard, boring HTTP GET request. However, the client sneaks two special headers into the request:
+
+Connection: Upgrade
+
+Upgrade: websocket
+When the server reads those headers, it replies with an HTTP 101 Switching Protocols status code. At that exact millisecond, the HTTP connection "dies" and is instantly reborn as a persistent WebSocket connection over the exact same TCP network pipe.
+
+Why is this brilliant? Because the initial request was standard HTTP, it automatically carries your user's auth cookies and headers. The server can verify who the user is before agreeing to upgrade the connection.
+
+the same problem of sse happens here too-
+Pro-Tip: To fix this, WebSocket developers have to build "Heartbeats"—sending a tiny, invisible "ping" message every 30 seconds just to keep the Load Balancer awake
+
+
+```
+## the code
+```
+package main
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/websocket"
+)
+
+// 1. Configure the "Upgrader"
+// This is the engine that transforms an HTTP request into a WebSocket
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	// Security: Allow connections from any origin for this example
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
+
+// 2. The actual API Handler
+func wsHandler(w http.ResponseWriter, r *http.Request) {
+	// THE MAGIC HAPPENS HERE: We catch the HTTP request and "Upgrade" it
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println("Upgrade failed:", err)
+		return
+	}
+	// Make sure we close the pipe when the function eventually ends
+	defer conn.Close() 
+
+	fmt.Println("Client successfully upgraded to WebSocket!")
+
+	// 3. The Infinite Two-Way Loop
+	for {
+		// Wait and READ a message from the client
+		messageType, message, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("Client disconnected:", err)
+			break
+		}
+		
+		fmt.Printf("Client says: %s\n", message)
+
+		// Create a JSON string to reply with
+		reply := []byte(`{"status": "Message received loud and clear!"}`)
+
+		// WRITE the message back down the pipe to the client
+		err = conn.WriteMessage(messageType, reply)
+		if err != nil {
+			log.Println("Failed to send reply:", err)
+			break
+		}
+	}
+}
+
+func main() {
+	// We still register it to a standard HTTP route!
+	http.HandleFunc("/chat", wsHandler)
+	
+	fmt.Println("Server listening on :8080")
+	http.ListenAndServe(":8080", nil)
+}
+
+
+```
+## wwe suplex-duplex
+```
+1)Simplex (The One-Way Street)-API Example: The Server-Sent Events (SSE) we discussed earlier operates conceptually like a simplex connection. The server pushes data to the browser, but the browser cannot use that same stream to talk back.
+
+Half-Duplex (The One-Lane Bridge)
+In a half-duplex system, data can travel in both directions, but only one at a time.
+API Example: Standard HTTP/1.1 (REST/GraphQL) acts like this. The client sends a request and waits. The server receives it, processes it, and sends the response back. They take turns.
+
+Full-Duplex (The Two-Lane Highway)
+WebSockets are actually the ultimate example of Full-Duplex communication! Once the WebSocket connects, the client can shoot 100 messages to the server at the exact same millisecond the server is shooting 100 messages back to the client. They do not have to wait their turn.
+
+Multiplexing in HTTP/2 (The Carpool Lane)
+HTTP/2 introduced multiplexing over a single connection.
+Instead of sending whole files one by one, HTTP/2 chops every file up into tiny, numbered "frames". It then mixes all the frames from the HTML, CSS, and Video together and blasts them all down one single TCP connection simultaneously.
+
+full duplex http2 also
+
+```
+## no rules is ws
+```
+At the top, you see wss:// /tickers.
+Just like http:// upgrades to https:// for security, ws:// upgrades to wss:// (WebSocket Secure). This is the initial endpoint the client hits to upgrade the connection.
+
+Look at the right side ("Sent"). Because the client can no longer use standard HTTP methods like GET or POST, it has to include the "verb" inside the JSON payload itself.
+
+action: "subscribe": The client sends this JSON object to tell the server, "I am keeping this pipe open, but I specifically want you to start blasting live price updates for stock XYZ down the pipe."
+
+action: "unsubscribe": Later, if the user navigates away from that stock's page, the client sends this JSON so the server stops wasting bandwidth sending data the user isn't looking at.
+
+
+```
+## the tradeoff
+```
+REST is Stateless: When you send an HTTP request, the server processes it, sends the response, and instantly forgets who you are. If a company gets a surge of traffic, they just turn on 100 new servers behind a Load Balancer. The Load Balancer can blindly throw your next request to any of those 100 servers, and it will work perfectly.
+
+WebSockets are Stateful: When you open a WebSocket, you form a permanent physical bond with Server #1. The server has to dedicate a piece of its RAM to keep your specific connection alive.
+
+What happens if Server #1 crashes? Your connection instantly dies.
+
+What happens if the Load Balancer tries to route your next message to Server #2? Server #2 has no idea who you are, and drops the message.
+
+What if User A is connected to Server #1, and User B is connected to Server #2, and they are in the same chat room? The servers now have to be wired together (usually using a tool like Redis Pub/Sub) just to talk to each other.
+
+```
+
+## THe WEBRTC
+```
+web real-time communication
+WebRTC (Web Real-Time Communication) completely flips the script. It allows two web browsers to stream heavy video, audio, or arbitrary data directly to each other, completely bypassing your backend servers.
+The Switch to UDP (Speed over Perfection)
+The text notes this is the only protocol we've covered that uses UDP instead of TCP.
+
+Before a WebRTC connection can begin, both clients connect to a Signaling Server (usually built using WebSockets!).
+
+This server does not handle the heavy video data.
+
+It acts like a Matchmaker. Peer A sends a message saying: "Hi, I want to call Peer B. Here are my video codecs and my IP address." * The Signaling server hands that message to Peer B so they know where to aim their walkie-talkies.
+
+The NAT Problem (Why P2P is incredibly hard)
+In a perfect world, the Signaling Server connects them, and they start streaming. In reality, NAT (Network Address Translation) ruins everything.
+
+Your home router hands out fake, private IP addresses (like 192.168.1.5) to your laptop. If your laptop tells Peer B to connect to 192.168.1.5, Peer B's browser will fail, because that is a fake internal address, not a public internet address. Furthermore, your home router's firewall actively blocks random inbound connections to keep you safe from hackers.
+
+To bypass these strict routers and firewalls, WebRTC uses two incredibly clever techniques:
+
+The First Attempt: STUN (The Mirror)
+
+STUN stands for Session Traversal Utilities for NAT.
+
+Think of the STUN server as a mirror on the public internet. Before the call, your browser yells out to the STUN server: "Hey! What do I look like to the outside world?"
+
+The STUN server replies: "Your public IP is 98.201.x.x, and you are talking out of Port 4000."
+
+Your browser takes that public information, gives it to the Signaling Server, and uses a technique called "Hole Punching" to trick your router into leaving Port 4000 open so Peer B's video stream can get through the firewall.
+
+The Fallback: TURN (The Relay)
+
+Sometimes (especially on strict corporate or university networks), firewalls are so intense that STUN hole-punching completely fails. Direct P2P is impossible.
+
+When this happens, WebRTC falls back to a TURN server (Traversal Using Relays around NAT).
+
+If they can't connect directly, both Peer A and Peer B connect to the TURN server, and the TURN server relays the heavy video data between them.
+
+Note: Using TURN completely defeats the purpose of P2P, turning it back into a Client-Server model. It is expensive and slow, but it guarantees the call won't drop.
+
+```
+## Diff between signalling and turn
+```
+ou have to split the concept of a "Call" into two completely separate things: Control Data (Text) and Media Data (Video/Audio).
+The Signaling Server (The Matchmaker)
+The Signaling Server never touches your video or audio. It only handles Control Data.
+
+What it does: It is essentially a text-chat room (usually built with WebSockets) where Peer A and Peer B exchange their IP addresses, port numbers, and camera capabilities.
+
+The Analogy: It’s like a dating app. You use Tinder (Signaling Server) to exchange phone numbers with someone. Once you have their number, you delete Tinder and text them directly. The dating app doesn't listen to your actual phone call.
+
+Once the connection is made: The Signaling Server's job is 100% done. The video flows directly from Peer A to Peer B.
+
+2. The TURN Server (The Chaperone)
+The TURN Server only handles Media Data (Video/Audio), and only if the direct connection fails.
+
+What it does: If Peer A and Peer B have firewalls that are too strict to connect directly, they hire a TURN server to sit in the middle. Peer A streams 5 Gigabytes of video to the TURN server, and the TURN server forwards it to Peer B.
+
+The Analogy: If you aren't allowed to text your date directly, you hire a courier to run back and forth between your houses carrying your messages.
+
+
+```
+```
+// 1. Tell the browser where your STUN/TURN servers are
+const configuration = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' }, // Free Google STUN server
+    { urls: 'turn:my-expensive-server.com', username: 'user', credential: 'password' }
+  ]
+};
+
+// 2. Create the core WebRTC engine
+const peerConnection = new RTCPeerConnection(configuration);
+
+// ==========================================
+// PHASE 1: THE SIGNALING (Control Data)
+// ==========================================
+
+// 3. The browser automatically generates "ICE Candidates" (its IP/Port info)
+peerConnection.onicecandidate = (event) => {
+  if (event.candidate) {
+    // We MUST send this text data to the other peer via our Signaling Server (WebSocket)
+    signalingServer.send({
+      type: 'new-ice-candidate',
+      candidate: event.candidate
+    });
+  }
+};
+
+// 4. Create the "Offer" (Hi, I want to call you)
+async function startCall() {
+  const offer = await peerConnection.createOffer();
+  await peerConnection.setLocalDescription(offer);
+  
+  // Send the offer to the other peer via the Signaling Server
+  signalingServer.send({
+    type: 'video-call-offer',
+    sdp: offer
+  });
+}
+
+// ==========================================
+// PHASE 2: THE MEDIA (Video/Audio)
+// ==========================================
+
+// 5. Grab the user's Webcam and Microphone
+navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+  .then((stream) => {
+    // Attach the webcam video to our WebRTC engine
+    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+  });
+
+// 6. When the OTHER peer's video finally arrives, put it on our screen
+peerConnection.ontrack = (event) => {
+  const remoteVideoElement = document.getElementById('remoteVideo');
+  remoteVideoElement.srcObject = event.streams[0]; // The video starts playing!
+};
+
+
+```
+## diff between webrtc and websockets
+```
+If you try to use WebRTC (Peer-to-Peer) for a 50-person group chat or a massive multiplayer game, your system will instantly collapse due to The Full Mesh Network Problem.The WebSocket (Client-Server) Way: If 50 people are in a chat room, they all connect to your central server. Your server holds 50 connections.
+The WebRTC (Peer-to-Peer) Way: Because there is no central server, every single person must maintain a direct connection with every other person.
+ The mathematical formula for this is $\frac{N(N-1)}{2}$.For 50 people, that is $\frac{50(49)}{2} = 1,225$ simultaneous connections!
+ Your laptop's CPU and network card would literally overheat trying to process and encode 49 separate outgoing video streams at the exact same time.
+
+
+```

@@ -706,6 +706,8 @@ When you hit refresh on mysite.com/products?page=3, the browser still nukes the 
 - If you hook the <input> directly to the URL parameters, the app will execute a network request on every single keystroke your user types. If they type "laptop", it will trigger 6 separate API calls in half a second.
 - Instead, we use searchInput to let them type freely. The URL only updates when they hit Enter or click "Search".
 
+- we can debounce as well from lodash library
+
 - 2)TanStack Query creates separate, isolated cache compartments for every unique combination of your key array.
 - Page 1 of all products (['products', {skip: 0, limit: 10, search: ''}]) gets its own cache compartment.
 - Page 1 of "phone" (['products', {skip: 0, limit: 10, search: 'phone'}]) gets a completely different cache compartment.
