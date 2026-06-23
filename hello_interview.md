@@ -848,6 +848,15 @@ four mandatory rules
 3. Tell the Browser to Listen (Content-Type: text/event-stream)
 The Strict Formatting (data: ... \n\n)
 ```
+## why we keep connection-alive here
+```
+In normal HTTP, keep-alive is used to send multiple different files over one connection.
+
+But in SSE, you are using it for a different reason: you are sending one single file that never ends. If you didn't include Connection: keep-alive, intermediate firewalls, proxies, or even older browsers might look at the connection, assume it's a glitch because the file is taking too long to download, and forcefully cut the connection.
+
+By explicitly declaring keep-alive, you are telling the entire internet infrastructure between your Go server and the user: "Do not hang up this phone line. We are going to be talking for a very long time."
+
+```
 ## the bidirectional way
 ```
 The text then pivots to your exact scenario: what if the application requires Bidirectional (Two-Way) Communication? What if you are building a multiplayer browser game, a live chat room, or a collaborative Google Doc where multiple people are typing at the exact same time?
