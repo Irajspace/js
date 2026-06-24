@@ -405,7 +405,7 @@ POST: Send data to the server.- non-idempotent .. final result will not be same
 PUT: Update data on the server.- idempotent .. final result will be same if we do multiple times
 PATCH: Update a resource partially.
 DELETE: Delete data from the server. DELETE requests should be idempotent.- here user 1 deleted once if u send multiple user 1 will not be there
-
+3. The Nuance of PATCH-Interviewers love asking about the difference between PUT and PATCH.The text highlights a brilliant edge case: PATCH is not mathematically guaranteed to be idempotent.If your patch is "Set user's age to 25", running that 10 times is safe (Idempotent).If your patch is "Add $5 to user's wallet", running that 10 times gives them $50 (Not Idempotent).Here is an interactive simulator so you can visually experience exactly how these verbs interact with the database during a dreaded "Network Retry" storm!
 ```
 
 ## status codes
