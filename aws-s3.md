@@ -2,29 +2,29 @@
 - if you want to store data in petabytes,gigabytes
 - store blob(binary large object)
 - a bucket contains collection of objects
--![alt text](image.png)
+-![alt text](aws-s3-images/image.png)
 
 ## why bucknet name should be diff for whole global space
-- ![alt text](image-1.png)
+- ![alt text](aws-s3-images/image-1.png)
 - no conflict in dns resolution
 
 ## public access
--![alt text](image-2.png)
+-![alt text](aws-s3-images/image-2.png)
 
 ## when you upload that file
 - you got public url to access that file
 
 ## how to access object from public url
--![alt text](image-3.png) 
+-![alt text](aws-s3-images/image-3.png) 
 - you have to add policy 
 - means add policy generator
 - in principal - type * means anu user
--![alt text](image-4.png)
+-![alt text](aws-s3-images/image-4.png)
 
 ## S3 versioning
 - we can version our files on the bucket level and we have to manually enable it
 - easly rollback
--![alt text](image-5.png)
+-![alt text](aws-s3-images/image-5.png)
 
 ## Replication strategies
 -suppopse we have a bucket in region-1 
@@ -41,13 +41,13 @@
 - live replication
 - by default only new objects added after replication is enabled after replication
 -old objects can be replicated- (S3 batch replication)
--![alt text](image-6.png)
--![alt text](image-7.png)
+-![alt text](aws-s3-images/image-6.png)
+-![alt text](aws-s3-images/image-7.png)
 
 ### S3 storage classes
 - we can created different type of s3 class based on access/storage pattern
 - when u are uploading something , there are some properties option
-- ![alt text](image-8.png)
+- ![alt text](aws-s3-images/image-8.png)
 - S3 standard(general)-99..99% availabilty - is used for frequent access, low latency,high throughput
 - S3 standard(infrequent access)-good for data which is not frequently access but requires rapid access when needed, availiabilty-99.99%,low cost 
 - S3 one zone infrequent access
@@ -62,9 +62,9 @@
 
 ### life cycle route
 - in management
--![alt text](image-9.png)
--![alt text](image-10.png)
--![alt text](image-11.png)
+-![alt text](aws-s3-images/image-9.png)
+-![alt text](aws-s3-images/image-10.png)
+-![alt text](aws-s3-images/image-11.png)
 - so what it does let say you can urself determine after how many days you want to transitition in which storage class
 -1) transpiration access- storage classes gets changed
 -2) expiration access - older versions gets deleted

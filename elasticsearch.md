@@ -5,7 +5,7 @@
 - Node -> a single running instance of elasticsearch file
 - Cluster -> a collection of one or more nodes working under the same cluster.name
 
-![alt text](image-49.png)
+![alt text](elastic-images/image-49.png)
 
 ```
 curl -XGET 'http://localhost:9200/_count?pretty' -d '
@@ -56,7 +56,7 @@ An Elasticsearch cluster contains multiple indices (databases), which contain mu
 
 
 ```
-![alt text](image-50.png)
+![alt text](elastic-images/image-50.png)
 
 
 
@@ -67,13 +67,13 @@ An Elasticsearch cluster contains multiple indices (databases), which contain mu
 - each shard is called lucene index on its own
 - each node can have differnt shards of same index
 -Splitting a 400 GB index into 1,000 shards, for example, would unnecessarily strain your cluster. A good rule of thumb is to limit shard size to 10–50 GB.
--![alt text](image-55.png)
-![alt text](image-53.png)
-![alt text](image-54.png)
+-![alt text](elastic-images/image-55.png)
+![alt text](elastic-images/image-53.png)
+![alt text](elastic-images/image-54.png)
 - and each lucene index has segments where actual documents are stored
-![alt text](image-51.png)
+![alt text](elastic-images/image-51.png)
 - here you see replication of one node is kept on a different node
--![alt text](image-52.png)
+-![alt text](elastic-images/image-52.png)
 
 ```
 Cluster
@@ -97,11 +97,11 @@ Cluster
 -Yes, OpenSearch automatically decides shard placement, but you decide how many nodes exist in the cluster.
 
 Let's break it down.
--![alt text](image-56.png)
--![alt text](image-57.png)
+-![alt text](elastic-images/image-56.png)
+-![alt text](elastic-images/image-57.png)
 
 ## inverted index
--![alt text](image-58.png)
+-![alt text](elastic-images/image-58.png)
 
 
 ## BM25
@@ -109,7 +109,7 @@ Let's break it down.
 -penalises long documents
 -how many times appeared in the document
 -rarer words -more score
--![alt text](image-59.png)
+-![alt text](elastic-images/image-59.png)
 
 ## Creating index
 -

@@ -88,11 +88,11 @@ and u have changed
 max-age is relative to the response time, so if all the above resources are requested as part of the same navigation they'll be set to expire at roughly the same time, but there's still the small possibility of a race there. If you have some pages that don't include the JS, or include different CSS, your expiry dates can get out of sync. And worse, the browser drops things from the cache all the time
 ```
 
-![alt text](image-21.png)
-![alt text](image-22.png)
+![alt text](caching-images/image-21.png)
+![alt text](caching-images/image-22.png)
 
 ## diff between no-cache and no-store
-![alt text](image-23.png)
+![alt text](caching-images/image-23.png)
 
 ## in the req header
 -if cache set is public then it means it can be cached in between like proxies or cdn
@@ -104,18 +104,18 @@ max-age is relative to the response time, so if all the above resources are requ
 - they are generated to see if the same type hash value is coming from server. if so means same request with no change so we can give cache page
 ## Cache busting
 - ususally next js files do like this so that cdn cant give stale data they hash the js files with random hashes
-![alt text](image-24.png)
+![alt text](caching-images/image-24.png)
 
 ## CDN and reverse-proxies
--![alt text](image-25.png)
--![alt text](image-26.png)
-=![alt text](image-27.png)
+-![alt text](caching-images/image-25.png)
+-![alt text](caching-images/image-26.png)
+=![alt text](caching-images/image-27.png)
 - ususally what happens we can do load balancing in network proxies itself then why do we load balancers before
 -beacuse reveerse proxies works at application level
 -and load balancer at aws works at network layer
 
 ## Database caching
--![alt text](image-43.png)
+-![alt text](caching-images/image-43.png)
 
 
 
@@ -151,7 +151,7 @@ Read-Heavy Applications: (e.g., User profiles, blog posts, product catalogs). Da
 ### Caching stratgies- these are architectures
 ```
 1) Inline cache->
-Look at the blue text at the very bottom of your image: "cache consistency is the responsibility of the cache". This is the defining feature of an inline cache.
+Look at the blue text at the very bottom of your caching-images/image: "cache consistency is the responsibility of the cache". This is the defining feature of an inline cache.
 
 The Advantages:
 
@@ -242,7 +242,7 @@ app.put('/users/:id', async (req, res) => {
 
 ```
 ### Cache eviction
--![alt text](image-45.png)
+-![alt text](caching-images/image-45.png)
 ```
 // Set max memory to 100 Megabytes (Value is in bytes: 100 * 1024 * 1024)
         await redisClient.configSet('maxmemory', '104857600');
@@ -351,9 +351,9 @@ the eviction algorithm or changing the cache size can reduce thrashing.
 ### Cache cold means jab initially data ni hota hai toh saara cache miss hota hai so uske liye prefeeding krte hain that is called cache warmup
 
 ### Cache penetration
--![alt text](image-46.png)
+-![alt text](caching-images/image-46.png)
 ## Cache avalanche
-![alt text](image-47.png)
+![alt text](caching-images/image-47.png)
 ```
 preventing avalanceh and penetration
 // A safe implementation to prevent Penetration and Avalanche

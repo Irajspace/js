@@ -76,4 +76,4 @@ process.uptime()-> ye seconds mein btata hai
 - use prom-client package from npm
 - promclient.defaultmetrics()
 - ek prometheus.yml file hoti hai iske scrape mein jaakar jobs daaloge tab hi tmhara server ka endpoint ka metric btayega
--![alt text](image-48.png)
+-![alt text](observability-images/image-48.png)

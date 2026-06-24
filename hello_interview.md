@@ -1,5 +1,5 @@
 # How to tackle interview
-## ![alt text](image-20.png)
+## ![alt text](hello-interview-images/image-20.png)
 ~~~
 Requirements-> Core entities ->(API or interface)->Data flow->High Level Design->Deep dives
 ~~~
@@ -136,11 +136,11 @@ here in image u see authentication service needs to talk to notification service
 every languaage has its own HTTP library and request and every one has to talk to notification to talk to client make massive no of request
 ```
 
-![alt text](image-61.png)
-![alt text](image-62.png)
+![alt text](hello-interview-images/image-61.png)
+![alt text](hello-interview-images/image-62.png)
 
 ## Problem with JSON
-![alt text](image-63.png)
+![alt text](hello-interview-images/image-63.png)
 -grpc(http/2)
 ```
 serialization deserialisation (grpc framework)uses protobuff
@@ -149,7 +149,7 @@ keys ko integer mein convert krta hai
 
 
 ```
-![alt text](image-64.png)
+![alt text](hello-interview-images/image-64.png)
 
 
 ### GraphQL
@@ -231,7 +231,7 @@ By listing these steps out loud, you are essentially creating a checklist for th
 
 
 ```
-![alt text](image-65.png)
+![alt text](hello-interview-images/image-65.png)
 
 
 ## networking essentials
@@ -561,7 +561,7 @@ type User {
 }
 It slows down initial development. You can't just hack things together quickly; you have to meticulously define the type of every single piece of data in your system before you can write the actual logic.
 ```
-![alt text](image-71.png)
+![alt text](hello-interview-images/image-71.png)
 
 ## the N+1 
 ```
@@ -880,7 +880,75 @@ When the server reads those headers, it replies with an HTTP 101 Switching Proto
 Why is this brilliant? Because the initial request was standard HTTP, it automatically carries your user's auth cookies and headers. The server can verify who the user is before agreeing to upgrade the connection.
 
 the same problem of sse happens here too-
+
 Pro-Tip: To fix this, WebSocket developers have to build "Heartbeats"—sending a tiny, invisible "ping" message every 30 seconds just to keep the Load Balancer awake
+Keep-Alive says:
+
+"After this request finishes, don't close the TCP connection yet."
+
+Browser -----------------> Server
+          GET /home
+
+Browser <----------------- Server
+          HTML
+
+Connection stays open
+
+Now another request can reuse the same TCP connection:
+
+Browser -----------------> Server
+          GET /image1
+
+Browser <----------------- Server
+          image
+
+No new handshake is needed.
+
+Problem solved by Keep-Alive
+
+It reduces:
+
+latency
+CPU usage
+number of TCP handshakes
+
+It is mainly about reusing connections.
+
+3. What is an idle connection?
+
+Imagine:
+
+Client <------ TCP ------> Server
+
+The connection exists.
+
+But nobody sends data for 5 minutes.
+
+No bytes
+No bytes
+No bytes
+
+This is called an idle connection.
+
+4. Why are idle connections a problem?
+
+Network devices have limited memory.
+
+Things like:
+
+Load balancers
+Proxies
+Firewalls
+NAT gateways
+
+track every open connection.
+
+They don't want to keep millions of idle connections forever.
+
+So they often have rules like:
+
+If no traffic for 60 seconds:
+    close connection
 
 
 ```
@@ -1325,8 +1393,8 @@ The MOVED Fallback: What if the cluster changed recently and your client's map w
 one more example dns
 
 ```
-![alt text](image-77.png)
-![alt text](image-78.png)
+![alt text](hello-interview-images/image-77.png)
+![alt text](hello-interview-images/image-78.png)
 
 ## two problems in client load balancing
 ```
@@ -1429,7 +1497,7 @@ The Reward (Reliability): In exchange for paying that latency tax, you get "very
 
 
 ```
-![alt text](image-79.png)
+![alt text](hello-interview-images/image-79.png)
 
 ## Layer-4 and Layer-7 protocol load balancer
 ```

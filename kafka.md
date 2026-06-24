@@ -6,15 +6,15 @@
 
 # topics
 - topics store data in logs
--![alt text](image-12.png)
+-![alt text](kafka-images/image-12.png)
 -immutable
 -you can also derive topics from other topics
--![alt text](image-13.png)
+-![alt text](kafka-images/image-13.png)
 - logs are not like queue means once data is read it is still there
--![alt text](image-14.png)
+-![alt text](kafka-images/image-14.png)
 -logs can be deleted after certain period
 -default is 7 days
--![alt text](image-15.png)
+-![alt text](kafka-images/image-15.png)
 
 ## partitions
 -location wise kr skte ho
@@ -25,18 +25,18 @@
 - 1 partition ek hi consumer group ko ja skta hai
 
 ## consumer group
-![alt text](image-19.png)
+![alt text](kafka-images/image-19.png)
 - self balancing ek group ke liye hoti hai
 - pub/sub mein ek producer hota hai and multiple consumers hote hain
 
 ## brokers
--![alt text](image-16.png)
--![alt text](image-17.png)
+-![alt text](kafka-images/image-16.png)
+-![alt text](kafka-images/image-17.png)
 - they form kafka clusters
 - these are nothing but the things that get message from producer and sent it to consumer
 
 ## replication
--![alt text](image-18.png)
+-![alt text](kafka-images/image-18.png)
 - the darker one is read replica
 
 ## producers

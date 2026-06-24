@@ -17,7 +17,7 @@ The Equation: Daily Storage = DAU * Posts Per User * Size Per Post
 
 
 ```
-![alt text](image-74.png)
+![alt text](numbers-images/image-74.png)
 
 # how to assume
 ```
@@ -52,7 +52,7 @@ Roughly 16 to 18 terabytes per year. A single high-end server with SSDs can hold
 Do this: Notice how the estimation ended with an architectural insight, not just a number. "16–18 TB fits on one box, so storage volume isn't the bottleneck" is the sentence that earns you points.
 
 ```
-![alt text](image-75.png)
+![alt text](numbers-images/image-75.png)
 
 ## Mock interview
 ```
@@ -97,4 +97,4 @@ You: Not comfortably. A large SSD is 1-4 TB, and even with a RAID setup you'd be
 
 
 ```
-![alt text](image-76.png)
+![alt text](numbers-images/image-76.png)
