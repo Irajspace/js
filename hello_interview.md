@@ -1134,7 +1134,14 @@ const configuration = {
     { urls: 'turn:my-expensive-server.com', username: 'user', credential: 'password' }
   ]
 };
+/*
+the above code 
+When you pass this config into RTCPeerConnection, the browser's internal engine immediately wakes up and shoots a hidden request to Google's STUN server asking, "What is my router's public IP address?" You don't have to write the HTTP or UDP request to Google; the browser does it automatically.
 
+
+
+
+*/
 // 2. Create the core WebRTC engine
 const peerConnection = new RTCPeerConnection(configuration);
 
@@ -1152,7 +1159,16 @@ peerConnection.onicecandidate = (event) => {
     });
   }
 };
+/*
+That event.candidate object? That is your IP address and UDP port. If you add a console.log(event.candidate.candidate) right there, you will see something that looks like this:
+candidate:842163049 1 udp 1677729535 192.168.1.5 54321 typ srflx raddr 0.0.0.0 rport 0
 
+Look closely at that string! It literally says udp, it has your IP (192.168.1.5), and your port (54321).
+Your Go WebSocket server takes this string and hands it to the other person. That is how they find each other.
+
+
+
+*/
 // 4. Create the "Offer" (Hi, I want to call you)
 async function startCall() {
   const offer = await peerConnection.createOffer();

@@ -186,7 +186,51 @@ to create docker volume create custom_data
 
 ```
 ## docker compose
+![alt text](image-28.png)
+![alt text](image-29.png)
+![alt text](image-30.png)
 ```
+create docker-compose.yml file
+
+name: e-commerce
+services:
+    db:
+        image:postgres:16
+        container_name:postgres
+        environment:
+            POSTGRES_PASSWORD=postgres
+
+
+then run docker compose up -d
+
+```
+
+## how networking works in docker compose
+
+## how volumes in docker compose
+![alt text](image-31.png)
+![alt text](image-32.png)
+```
+to persist the data
+
+```
+
+## custom docker builds
+![alt text](image-33.png)
+![alt text](image-34.png)
+![alt text](image-35.png)
+![alt text](image-36.png)
+```
+whenever there is some changes u need to pull from dockerhub then push the changes and then again pusht it in dockerhub so this is overkill for egs backend is added in above photo
+what you can do u use build command
+
+you see the image here how to connect to redis within same network, remove localhost and use redis
+since u are connecting internally remove port mappaing from postgres and redis and only expose of node js
+```
+
+## docker orchesteration
+```
+
 
 
 ```
