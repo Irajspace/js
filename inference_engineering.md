@@ -31,3 +31,31 @@ Multi-Cloud Capacity Management: Software to manage resources across different c
 Autoscaling: Automatically spinning up more servers when traffic spikes and turning them off when it's quiet.
 Routing & Load Balancing: Directing incoming user requests to the servers that have the most capacity so no single machine gets overwhelmed.
 ```
+
+## model training
+```
+Best Practices for Evals & Fine-Tuning
+1. Establishing a Baseline
+Some optimization techniques risk degrading model quality, making it essential to have a strict baseline to measure against.
+
+Standard vs. Custom Benchmarks: Standard public intelligence benchmarks (like MMLU or SWE-bench) are great for initial shortlisting, but they often become saturated or gamed.
+
+Goodhart's Law: "When a measure becomes a target, it ceases to be a good measure." Frontier labs are incentivized to beat public world-record benchmarks, meaning you cannot rely solely on public charts. There is no substitute for directly evaluating a model against your product's actual domain.
+
+Actionable Tips for Evals: Look at your actual data, be precise about focusing on the hardest problems your app solves, and use existing tooling rather than reinventing evaluation frameworks.
+
+
+```
+
+## what do u mean by fine-tuning
+```
+The Core Concept: Notice that the matrix dimensions do not change (it remains a 4x4 grid), but specific numbers inside the grid are altered (highlighted in bold green, like the 1 changing to 6, 7 changing to 3, etc.).
+
+Key Takeaway: Fine-tuning shifts the values of a model's internal weights to specialize its knowledge while preserving its overall structural architecture.
+
+```
+## what do u mean by distillation
+```
+
+
+```

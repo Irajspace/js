@@ -446,3 +446,253 @@ The Pros: Excellent performance. Redis almost never slows down.
 The Cons: If the server crashes, you will lose exactly 1 second of data.
 
 ```
+![alt text](image-50.png)
+
+## three invalidation strategies
+
+```
+a) delets caches first, then update database-causes inconsitency between the process
+b)update database first, then cache- two users race condition can cause inconsistency in data
+c)update database first, then delete cache-industry method
+
+most imp adv solutions
+-delayed double delete- double checking if state data in cache is there or not
+-cdc(chang data capture)-debezium monitors first asynchronous event to clear cache after writing to database
+
+Strategy,Ordering,Race Condition Vulnerability,Production Recommendation
+Delete First,Cache Delete → DB Update,High (Concurrent reads easily re-populate old data),Avoid unless using Double Delete
+Update Cache,DB Update → Cache Update,Medium (Concurrent writes can overwrite with stale sequences),Avoid for high-concurrency keys
+Delete Second,DB Update → Cache Delete,Extremely Low (Requires perfectly timed interleaving),Highly Recommended Default
+
+
+
+
+
+```
+## aof bloat problem
+```
+imagine a user update its profile 100 times and delete it
+The Solution: Compaction
+The command BGREWRITEAOF stands for Background Rewrite Append-Only File.
+When this runs, Redis completely ignores the massive, messy history in the old log file. Instead, it looks at the current state of the RAM, and writes a brand new, perfectly optimized, ultra-short log file from scratch.
+Because that user deleted their account, Redis won't write any commands for them in the new file. It just deleted 101 useless lines! As the text notes, modern Redis is usually configured to do this cleanup automatically in the background when the file gets too big.
+
+```
+
+## alternate -RDB
+```
+This section introduces RDB (Redis Database Backup), which is the alternative to AOF.
+Instead of keeping a running log of text commands, RDB takes a literal photograph (a binary snapshot) of your entire RAM at a specific millisecond in time and saves it as a .rdb file.
+SAVE (The Dangerous Way): If you run this command, Redis will stop absolutely everything it is doing to write the snapshot to the hard drive. Because Redis is single-threaded, your entire application will freeze. If the snapshot takes 5 seconds to save, any user trying to load your website during those 5 seconds will get a timeout error. You should almost never use this in production.
+
+BGSAVE (The Production Standard): This stands for Background Save. When you run this, Redis uses a Linux trick called "forking." It splits itself into two processes. The main process keeps serving your users at lightning speed without skipping a beat, while the "child" process quietly writes the snapshot to the hard drive in the background and then disappears.
+
+
+```
+## the combo
+```
+AOF (always or everysec): You use this to survive sudden crashes. It ensures that if the power cord is pulled out, you lose almost zero immediate data.
+
+RDB (Snapshots): You use this for "historical point-in-time" backups. For example, you might save an RDB file every night at midnight and push it to Amazon S3. If a developer accidentally writes a bug that corrupts your entire database on Thursday, AOF can't help you (it just perfectly recorded the corruption!). But you can grab Wednesday night's RDB snapshot and restore the system.
+
+
+industrial practice
+How Redis on Flash (RoF) works:
+Keys NEVER leave RAM: As the text notes, all the keys (e.g., user:101:profile) are kept in the expensive RAM. This means when your application asks "Do you have this data?", Redis can answer "Yes" or "No" at lightning RAM speed.
+
+Values are tiered by "Temperature" (LRU): The actual data (the heavy JSON objects, the images, the large text blocks) are split up based on how often they are used.
+
+Hot Data (Actively Used): If a value is requested constantly, it stays in RAM for instant access.
+
+Cold Data (Lesser Used): If a value hasn't been requested in a while, instead of deleting it (like a normal cache would), RoF pushes that heavy value down to the cheaper SSD.
+
+The Swap: If a user suddenly requests a piece of Cold Data, Redis fetches the value from the SSD, promotes it back up to RAM, and pushes a different Cold value down to the SSD to make room.
+
+when cache crashes write python script
+Standard open-source Redis only understands its own basic commands (GET, SET, etc.). To make it understand Python, your Redis server must have the RedisGears module installed. (If you use Redis Enterprise or a Redis Docker image with modules included, this is usually already there).
+again understand page no 49
+
+
+```
+
+## redis as a broker
+
+```
+This architecture is called Decoupling, and it acts as a massive shock absorber for your servers.
+
+If it is Black Friday and Service A suddenly generates 10,000 orders in one second, Service B (the email sender) might only be able to send 50 emails a second.
+Without Redis, the whole system would freeze.
+With Redis, Service A just rapidly dumps 10,000 messages into the Redis List. Redis happily holds them in its RAM. Service B then spends the next few minutes safely popping them off one by one at its own comfortable pace. No crashes, no lost data!
+
+```
+## redis search engine
+```
+On the left side of the diagram, you see a gray box labeled search index: "user:". When you set up RediSearch, you don't just tell it to index the whole database. You give it strict rules.
+
+In this example, the index has two strict rules for inclusion:
+
+Prefix Rule: The key must start with the text user:.
+
+Type Rule: The data stored at that key must be a Hash (a structured object with fields, similar to a flat JSON object).
+
+
+
+```
+
+## redis cli
+```
+Step 1: Populating the Data (HSET)
+The first block of code uses the HSET (Hash Set) command.
+Instead of setting a simple string like SET user:100 "Lee Atchison", HSET allows you to store a structured object with specific fields (username, firstname, lastname, etc.).
+
+In a relational database like PostgreSQL, this is the equivalent of INSERT INTO users....
+
+The code inserts three distinct users: Lee, John Smith, and David Johnson.
+
+Step 2: Building the Search Engine (FT.CREATE)
+This is where the magic happens. The FT.CREATE command tells Redis to build the search index in the background. Let's break down the syntax:
+
+user_idx: The name we are giving our new search index.
+
+PREFIX 1 "user:": This is the rule engine. It tells Redis, "Only look at keys that start with user:. Ignore everything else."
+
+SCHEMA ... TEXT: This tells Redis exactly which fields inside the Hash to index, and how to treat them. By declaring them as TEXT, you are telling Redis to treat them like a search engine would (allowing for partial matches, case-insensitivity, etc.) rather than strict, exact-match strings.
+
+Step 3: Executing the Search (FT.SEARCH)
+Now that the index is built, you can run search queries against it.
+
+The command asks the user_idx to find the word "john".
+
+The Brilliant "Gotcha": Notice the result. It returns user:101 (John Smith) AND user:102 (David Johnson).
+Why did it return David? Because RediSearch is a Full-Text Search Engine (similar to Elasticsearch). It doesn't just look for exact, case-sensitive matches. It looks across all the indexed text fields, ignores capital letters, and understands root words. It found "John" in user 101's first name, and it found the root "john" inside user 102's last name (Johnson).
+
+
+SET
+Adding (SADD):
+
+redis> SADD theset "AAA" (Returns 1 because it successfully added a new item).
+
+redis> SADD theset "BBB" (Returns 1).
+
+Viewing (SMEMBERS):
+
+redis> SMEMBERS theset (Returns "AAA" and "BBB". Remember, this order is essentially random because Sets don't track order).
+
+The Duplicate Test (The Magic of Sets):
+
+redis> SADD theset "CCC" (Returns 1, new item added).
+
+redis> SADD theset "BBB" (Returns 0!)
+
+Why 0? Because "BBB" is already in the set. Redis just ignores the command. This is incredibly useful for preventing duplicate actions in your application.
+
+Checking Existence (SISMEMBER):
+
+redis> SISMEMBER theset "AAA" (Returns 1. Yes, AAA is in the set).
+
+redis> SISMEMBER theset "DDD" (Returns 0. No, DDD is not in the set).
+
+Architectural Note: SISMEMBER is blindingly fast, even if your set has 10 million items in it.
+
+Removing (SREM):
+
+redis> SREM theset "BBB" (Removes "BBB" from the set).
+
+Real-World Use Case
+The last paragraph hints at a massive real-world use case for Sets: Idempotency (preventing double-processing).
+
+Imagine a user clicks "Submit Payment" twice on your website.
+When the first click hits the server, you generate a unique Transaction ID (TX_123) and run SADD payments TX_123. It returns 1, so you process the credit card.
+A millisecond later, the second click hits the server. You run SADD payments TX_123 again. It returns 0. Because it returned 0, your server instantly knows this is a duplicate request and safely ignores it, preventing the user from being double-charged!
+
+
+HSET 
+The Core Concept: Objects inside Keys
+Up until now, we've mostly looked at keys holding a single, flat string (e.g., SET user:100 "Lee").
+
+A Hash allows a single Redis key to hold a miniature database row, or a structured JSON object. Instead of one value, the key holds multiple Field-Value pairs. It is the perfect data type for representing objects like Users, Products, or Shopping Carts.
+Writing Data (HSET): You can set fields one at a time (HSET user:100 username lee), or you can set multiple fields at exactly the same time (HSET user:100 first Lee last Atchison).
+
+Reading Everything (HGETALL): This pulls the entire object out of Redis. It returns a flat list where the field name is followed immediately by its value (e.g., 1) "username", 2) "lee").
+
+Reading Specifics (HMGET): The "M" stands for Multiple. If a user profile has 50 fields, but your app only needs to display their first and last name, you use HMGET user:100 first last.
+
+Updating Specifics (HSET):
+If a user changes their password, you don't need to touch the rest of the profile. You just run HSET user:100 password "456789", and Redis overwrites only that specific field.
+
+Why go through the trouble of using a Hash? Why not just use a standard SET and store the user as a giant, stringified JSON object like this:
+SET user:100 '{"username":"lee", "password":"123", ...}'
+
+The answer is Network Bandwidth and Speed. If you store a massive 1-Megabyte JSON string, and the user wants to update their password:
+
+With a String: Your Node.js app has to download the entire 1MB string from Redis, parse it, update the password, stringify it, and upload the entire 1MB string back to Redis.
+
+With a Hash: Your Node.js app sends one tiny 20-byte command (HSET user:100 password "new") over the network. Redis updates it instantly in place. No downloading or parsing required!
+
+
+json objects
+The book writes: [ 123, { "life": 42 }, {"fish","please"} ]
+
+In JSON, key-value pairs must be separated by a colon, not a comma.
+
+The Fix: It should be {"fish": "please"}.
+
+Typo 2: Broken Array Math (Zero-Indexing)
+
+The book tries to fetch the "fish" value using this command: JSON.GET testkey [1].fish
+
+Arrays in JSON/Redis are 0-indexed.
+
+Index [0] is 123.
+
+Index [1] is {"life": 42}.
+
+Index [2] is {"fish": "please"}.
+
+If you ran the book's command ([1].fish), Redis would return null because the object at index 1 doesn't have a "fish" property!
+
+The Fix: It should be JSON.GET testkey [2].fish.
+
+1. Sorted Sets (ZSET)
+If a regular Set is a bouncer at a club (ensuring everyone is unique), a Sorted Set is a bouncer who also assigns everyone a priority number and forces them to stand in line based on that number.
+
+Every string you add to a ZSET is paired with a floating-point number called a Score. Redis automatically keeps the entire set sorted by this score in real-time.
+
+Key Commands: ZADD (add item with score), ZRANGE (get a range of items), ZREVRANK (get an item's rank from highest to lowest).
+
+Real-World Use Case: Leaderboards and Rate Limiters. If you are building a gaming leaderboard, you use ZADD leaderboard 500 "Player1". Redis instantly sorts them. When you need the Top 10 players, ZRANGE fetches them in milliseconds, even if you have 10 million players.
+We previously looked at using Lists for a First-In-First-Out (FIFO) queue between microservices. Streams are the modern, enterprise-grade evolution of that concept. They act like an append-only log file (similar to Apache Kafka).
+
+How it differs from Lists: When a consumer reads from a List using RPOP, the message is deleted forever. If the consumer crashes halfway through processing, the message is lost. Streams keep the messages intact and use "Consumer Groups" to track exactly which microservice has read which message, allowing for safe retries if a service crashes.
+
+Key Commands: XADD (append event), XREAD (read events), XACK (acknowledge an event is successfully processed).
+
+Real-World Use Case: Event Sourcing and Chat Apps. Recording a massive stream of user clicks on a website, or handling a live Twitch chat where thousands of messages flow per second and multiple different analytics services need to read the same messages independently.
+
+This is a probabilistic data structure that solves a massive memory problem: counting unique things.
+
+The Problem: If you want to count how many unique IP addresses visit your site today, you could put them in a regular Set. But if you get 50 million unique visitors, that Set will consume Gigabytes of expensive RAM.
+
+The Solution: HyperLogLog uses a complex hashing math trick to estimate the number of unique items with a standard error of less than 1%. The magic? It never consumes more than 12 Kilobytes of memory, whether you count 10 items or 10 billion items.
+
+Key Commands: PFADD (add item), PFCOUNT (get the estimated total).
+
+Real-World Use Case: Web Analytics. Tracking Daily Active Users (DAUs) or unique video views on YouTube where an exact, perfect count is less important than saving Terabytes of RAM.
+
+4. Bitmaps
+Bitmaps aren't technically a separate data structure; they are a way of treating a standard Redis String as an array of millions of tiny switches (bits) that can only be set to 0 or 1.
+
+Key Commands: SETBIT (flip a switch to 0 or 1), GETBIT (check a switch), BITCOUNT (count how many switches are set to 1).
+
+Real-World Use Case: Hyper-efficient Boolean Flags. Imagine you want to track if a user logged in today. User ID 500 logs in. You run SETBIT logins:today 500 1. You can track the daily login status of 8 million users using just 1 Megabyte of RAM.
+
+. Geospatial (GEO)
+Redis has built-in commands specifically for handling longitude and latitude coordinates. Under the hood, Redis actually converts the coordinates into a score and stores them inside a Sorted Set!
+
+Key Commands: GEOADD (store a location), GEOSEARCH (find items within a radius).
+
+Real-World Use Case: Ride-Sharing and Location Apps. When you open Uber, the app queries Redis: "Find all cars within a 2-mile radius of the user's longitude/latitude." Redis calculates the distances and returns the nearby drivers instantly.
+
+To help you visualize how a Sorted Set automatically manages state without application-side sorting, I've generated an interactive Leaderboard simulator below. Try updating the scores of different players and watch how Redis handles the ranking natively!
+
+```
