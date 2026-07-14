@@ -233,6 +233,17 @@ body: {
     year: "2019" // Only updates the year, leaves title and author alone
   }
 }
+client.update({
+    index: "books",
+    id: "99",
+    body: {
+        doc: {
+            title: "The Outsider",
+            year: "2019"
+        },
+        doc_as_upsert: true
+    }
+})
 Why does it need to know it's a "doc"?
 Because you don't have to use doc. The Update API also allows you to update documents using scripts (code that runs on the server to calculate a new value).
 
