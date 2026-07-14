@@ -300,6 +300,8 @@ curl -X PUT "localhost:9200/books/_doc/1" -H 'Content-Type: application/json' -d
 
 ## bulking
 -In OpenSearch, the _bulk API allows you to perform multiple indexing, updating, or deleting operations in a single HTTP request. Instead of telling the database to save a document, waiting for a response, and then asking it to save the next document, you hand the database a massive list of instructions and say, "Process all of these at once."
+<img width="1060" height="266" alt="image" src="https://github.com/user-attachments/assets/6b147e06-9163-4ade-8271-4b57da9b21f8" />
+
 ```
 The first time you look at a _bulk request, it looks broken. It is not formatted like a normal, pretty JSON array. It uses a format called NDJSON (Newline Delimited JSON).
 It works in pairs of lines (except for deletes, which only take one line).
@@ -315,6 +317,9 @@ POST _bulk
 { "update" : { "_index" : "books", "_id" : "1" } }
 { "doc" : { "year" : "2018" } }
 { "delete" : { "_index" : "books", "_id" : "3" } }
+
+
+
 
 
 When should you use _bulk?
