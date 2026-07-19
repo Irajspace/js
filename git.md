@@ -125,6 +125,52 @@ git merge staging
 6) lets say there are some files which are in remote and in your local - then git pull origin master- remote ke master branch se current branch mein la dega 
 
 ```
+- git rebase
+```
+Step 1: Tell Git to Rebase
+Since you got that error message previously, you first need to configure Git to use rebase for this pull. Run this in your terminal:
+
+Bash
+git config pull.rebase true
+
+Step 2: Run the Pull Command
+Now, execute your pull command exactly as you did before:
+
+Bash
+git pull origin main
+
+What to Expect Behind the Scenes
+
+When you hit enter, Git is going to do a fascinating little dance. Instead of smashing the two branches together in a single "Merge Commit," Git will do this:
+The Rewind: It temporarily unplugs or "sets aside" all the new commits you made locally on your branch.
+The Fast-Forward: It pulls down the new commits from GitHub's main branch and fast-forwards your local branch to match GitHub perfectly.
+The Replay: It takes your set-aside local commits and pastes them (replays them) one by one on top of the newly updated main branch.
+Your history will look like a single, straight line as if you wrote your code after your teammates pushed their updates!
+
+How to Handle Rebase Conflicts
+
+Because Git is replaying your commits one by one, if there is a conflict, it pauses the rebase right in the middle of the process.
+If Git stops and tells you there is a conflict, the process to fix it is slightly different than a standard merge:
+Fix the file: Open VS Code (or your editor), find the conflict markers (<<<<<<<), and fix the code exactly like you did before.
+Stage the fix: Tell Git you resolved it by running:
+
+Bash
+git add .
+Continue the replay (CRUCIAL): Do not run git commit. Instead, tell Git to pick up where it left off by running:
+
+Bash
+git rebase --continue
+Git will then move on to replaying your next commit. If there are more conflicts, repeat steps 1-3.
+
+The "Panic Button"
+If you get halfway through a rebase, get completely overwhelmed by conflicts, and want to cancel the whole thing to go back to exactly how it was before you typed git pull, just run:
+
+Bash
+git rebase --abort
+Go ahead and run the commands! Let me know what the terminal outputs if you get stuck.
+
+
+```
 
 ## how can u take remote repo to ur local
 ![alt text](image-47.png)
