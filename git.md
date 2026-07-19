@@ -191,6 +191,13 @@ Go ahead and run the commands! Let me know what the terminal outputs if you get 
 
 ## git branching strategies
 ![alt text](image-49.png)
-```
+![alt text](image-58.png)
 
+- see in photo the arrow dev->master
+![alt text](image-59.png)
+
+- reverting commit
+![alt text](image-60.png)
+```
+kya be 
 ```
