@@ -31,6 +31,30 @@ to create a new branch- git checkout -b dev
 
 
 ```
+- git workflow
+```
+Start fresh: Always make sure your local computer is up to date before starting new work.
+git checkout main
+git pull origin main
+Create your sandbox: Create your new branch for your specific task.
+git checkout -b feature/my-cool-new-button
+
+Write code and save: Do your work, add, and commit.
+git add .
+git commit -m "Add cool new button"
+Push your specific branch: Send only your branch up to GitHub.
+git push origin feature/my-cool-new-button
+
+The Staging Phase (Testing):
+Go to GitHub and open a Pull Request asking to merge feature/my-cool-new-button into staging.
+Your team reviews the code. Once approved, you click the "Merge" button on GitHub.
+The QA (Quality Assurance) team tests the app on the staging server to make sure your button works and doesn't break anything else.
+
+The Main Phase (Production):
+Once everything in staging is tested and confirmed working, a new Pull Request is opened to merge staging into main.
+When that PR is merged, your code goes live to the real users!
+
+```
 ![alt text](image-43.png)
 ![alt text](image-44.png)
 ![alt text](image-45.png)
