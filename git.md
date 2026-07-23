@@ -262,3 +262,17 @@ Everything in the temp/ directory would be ignored except for instructions.md. I
 
 
 ```
+## rebasing
+```
+Deleted Commit
+What happened??? Why is our I: commit just gone!?!
+
+Well, let's think about what happened during our rebase conflict resolution:
+
+We started a rebase of banned onto main, meaning we're rewriting the
+history of banned to include all the changes from main.
+We effectively removed all the changes from the I commit by choosing to keep the changes from main instead of banned.
+We continued the rebase, and Git realized that the I commit was pointless, and because we're rewriting history anyway, it just removed it.
+If our changes had been more complicated, say we had kept some of the changes from the I commit, and overwritten others, then Git would have kept the I commit in the history.
+
+```
